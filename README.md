@@ -7,9 +7,15 @@ All that is required is the managing server's SSH public key should be added to 
 
 How to setup:
 
-Check out this repository. Edit setup.conf for master and worker nodes and then run the following script:
+Check out this repository. 
+
+git clone https://github.com/ratulb/k8s-remote-install.git
+
+Edit setup.conf for master and worker nodes and then run the following script:
+
+vi setup.conf
 
 ./launch-cluster.sh
 
-And the cluster should be up and running. Has been tested for ubuntu18.04.
+And the cluster should be up and running with a nginx pod deployed on the cluster. Has been tested for ubuntu 18.04.
 
