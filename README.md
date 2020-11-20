@@ -17,7 +17,7 @@ vi setup.conf
 
 ./launch-cluster.sh
 
-And the cluster should be up and running with a nginx pod deployed on the cluster. Has been tested for ubuntu 16.04/18.04.
+And the cluster should be up and running with a nginx pod deployed on the cluster. Has been tested for ubuntu 16.04/18.04/20.04.1.
 
 
 
