@@ -55,11 +55,11 @@ echo -e "\e[1;42mInstalling weave cni pluggin\e[0m"
 if [ "$master" = "$host" ] || [ "$master" = "$host_ip" ]
  then
    . install-cni-pluggin.sh
-     sleep 5
+     sleep 10
    . test-commands.sh 
  else
    . execute-file-remote.sh $master install-cni-pluggin.sh
-     sleep 5
+     sleep 10
    . execute-file-remote.sh $master test-commands.sh
 fi 
 
