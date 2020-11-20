@@ -1,7 +1,7 @@
 # k8s-remote-install
-Install a kubernetes cluster remotely
+Install a kubernetes cluster remotely via a single script.
 
-Take the hassle out of logging into each machine install docker, install kubernetes components. Instead manage everything from a remote machine running a few scripts.The machine from where the script is launched can be a part of the cluster. Multi-master cluster is not supported currently.
+Take the hassle out of logging into each machine install docker, install kubernetes components. Instead manage everything from a remote machine.The machine from where the script is launched can be a part of the cluster too. Multi-master cluster is not supported currently.
 
 All that is required is the managing server's SSH public key should be added to the /root/.ssh/authorized_keys of the cluster machins.
 
