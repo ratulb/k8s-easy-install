@@ -5,7 +5,6 @@ read_setup setup.conf
 
 echo -e "\e[1;42mMaster is : $master"
 echo -e "\e[1;42mWorkers are : $workers"
-
 host=$(hostname)
 host_ip=$(hostname -i)
 echo -e "\e[1;42mThis host is : $host"
