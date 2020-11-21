@@ -6,16 +6,17 @@ print_msg "Configurations read from setup.conf"
 print_msg "Master: $master"
 print_msg "Workers: $workers"
 print_msg "Please make sure $HOME/.ssh/id_rsa.pub SSH public has been copied \
-  to remote machines!"
-print_msg "Proceed with installation? "
+to remote machines!"
 
 read -p "Proceed with installation? " -n 1 -r
 if [[ ! $REPLY =~ ^[Yy]$ ]]
 then
+    print_msg "Aborted cluster setup\n"
     exit 1
 fi
 
-host=$(hostname)
+echo "\n"
+
 host_ip=$(hostname -i)
 print_msg "This host is : $host"
 print_msg "This host ip is : $host_ip"
