@@ -1,13 +1,15 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: nginx-pod
+  name: nginx
+  labels:
+    env: test
 spec:
   containers:
-  - image: nginx
-    name: nginx-pod
+  - name: nginx
+    image: nginx
+    imagePullPolicy: IfNotPresent
   tolerations:
-  - key: node-role.kubernetes.io/master
-    operator: Exists
-    effect: NoSchedule
-   
+  - key: "node-role.kubernetes.io/master"
+    operator: "Exists"
+    effect: "NoSchedule"
