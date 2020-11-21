@@ -20,7 +20,7 @@ then
   . kubeadm-init.sh
 else 
   echo -e "\e[1;42mInstalling docker on remote master\e[0m"
-  . excute-file-remote.sh $master install-docker.sh
+  . execute-file-remote.sh $master install-docker.sh
   echo -e "\e[1;42mInstalling kubeadm kubelet kubectl on remote master\e[0m"
   . execute-file-remote.sh $master kube-remove-master.sh
   . execute-file-remote.sh $master install-kubeadm.sh
