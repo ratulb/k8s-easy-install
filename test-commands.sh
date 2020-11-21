@@ -9,7 +9,7 @@ sleep 5
 kubectl get nodes -o wide
 
 echo -e "\e[1;42mDeploying nginx pod\e[0m"
-kubectl apply -f https://github.com/ratulb/k8s-remote-install/blob/main/nginx-pod.yaml
+kubectl apply -f https://raw.githubusercontent.com/ratulb/k8s-remote-install/main/nginx-pod.yaml
 
 sleep 10
 
