@@ -1,7 +1,7 @@
 #!/usr/bin/env bash 
 . utils.sh
 
-read_setup setup.conf
+"read_setup"
 
 echo -e "\e[1;42mMaster is : $master\e[0m"
 echo -e "\e[1;42mWorkers are : $workers\e[0m"
