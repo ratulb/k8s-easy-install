@@ -1,4 +1,5 @@
 #!/usr/bin/env bash 
+export usr=$(whoami)
 read_setup()
 {
   file="$1"
