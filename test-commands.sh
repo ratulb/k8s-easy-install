@@ -1,21 +1,19 @@
 #!/usr/bin/env bash
 #Commands for testing the cluster setup
 
-echo -e "\e[1;42mChecking cluster nodes\e[0m"
+print_msg "Checking cluster nodes"
 kubectl get nodes -o wide
-sleep 5
+sleep 10
 kubectl get nodes -o wide
 sleep 5
 kubectl get nodes -o wide
 
-echo -e "\e[1;42mDeploying nginx pod\e[0m"
+print_msg "Deploying nginx pod"
 kubectl apply -f https://raw.githubusercontent.com/ratulb/k8s-remote-install/main/nginx-pod.yaml
 
-sleep 10
-
-echo -e "\e[1;42mInstalling weave cni pluggin\e[0m"
+sleep 15
 kubectl get pod
-sleep 5
+sleep 10
 kubectl get pod
 sleep 5
 kubectl get pod

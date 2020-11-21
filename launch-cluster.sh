@@ -2,26 +2,36 @@
 . utils.sh
 
 "read_setup"
+print_msg "Configurations read from setup.conf"
+print_msg "Master: $master"
+print_msg "Workers: $workers"
+print_msg "Please make sure $HOME/.ssh/id_rsa.pub SSH public has been copied \
+  to remote machines!"
+print_msg "Proceed with installation? "
 
-echo -e "\e[1;42mMaster is : $master\e[0m"
-echo -e "\e[1;42mWorkers are : $workers\e[0m"
+read -p "Proceed with installation? " -n 1 -r
+if [[ ! $REPLY =~ ^[Yy]$ ]]
+then
+    exit 1
+fi
+
 host=$(hostname)
 host_ip=$(hostname -i)
-echo -e "\e[1;42mThis host is : $host\e[0m"
-echo -e "\e[1;42mThis host ip is : $host_ip\e[0m"
+print_msg "This host is : $host"
+print_msg "This host ip is : $host_ip"
 #Master installation
 if [ "$master" = "$host" ] || [ "$master" = "$host_ip" ]
 then 
-  echo -e "\e[1;42mInstalling docker on local master\e[0m"
+  print_msg "Installing docker on local master"
   . install-docker.sh
-  echo -e "\e[1;42mInstalling kubeadm kubelet kubectl on local master\e[0m"
+  print_msg "Installing kubeadm kubelet kubectl on local master"
   . kube-remove-master.sh
   . install-kubeadm.sh
   . kubeadm-init.sh
 else 
-  echo -e "\e[1;42mInstalling docker on remote master\e[0m"
+  print_msg "Installing docker on remote master"
   . execute-file-remote.sh $master install-docker.sh
-  echo -e "\e[1;42mInstalling kubeadm kubelet kubectl on remote master\e[0m"
+  print_msg "Installing kubeadm kubelet kubectl on remote master"
   . execute-file-remote.sh $master kube-remove-master.sh
   . execute-file-remote.sh $master install-kubeadm.sh
   . execute-file-remote.sh $master kubeadm-init.sh
@@ -31,35 +41,35 @@ fi
 for worker in $workers; do 
   if [ "$worker" = "$host" ] || [ "$worker" = "$host_ip" ]
 then 
-  echo -e "\e[1;42mInstalling docker on local worker\e[0m"
+  print_msg "Installing docker on local worker"
   . install-docker.sh
-  echo -e "\e[1;42mInstalling kubeadm kubelet on local worker\e[0m"
+  print_msg "Installing kubeadm kubelet on local worker"
   . kube-remove-worker.sh
   . install-kubeadm-worker.sh
-  echo -e "\e[1;42m$worker joining the cluster\e[0m"
+  print_msg "$worker joining the cluster"
   . join-cluster.cmd
 else 
-  echo -e "\e[1;42mInstalling docker on $worker\e[0m"
+  print_msg "Installing docker on $worker"
   . execute-file-remote.sh $worker install-docker.sh
-  echo -e "\e[1;42mInstalling kubeadm kubelet on $worker\e[0m"
+  print_msg "Installing kubeadm kubelet on $worker"
   . execute-file-remote.sh $worker kube-remove-worker.sh
   . execute-file-remote.sh $worker install-kubeadm-worker.sh
-  echo -e "\e[1;42m$worker joining the cluster\e[0m"
+  print_msg "$worker joining the cluster"
   . execute-file-remote.sh $worker join-cluster.cmd
 fi 
 
 done
 
 #Install cni-pluggin
-echo -e "\e[1;42mInstalling weave cni pluggin\e[0m"
+print_msg "Installing weave cni pluggin"
 if [ "$master" = "$host" ] || [ "$master" = "$host_ip" ]
  then
    . install-cni-pluggin.sh
-     sleep 10
+     sleep_few_secs
    . test-commands.sh 
  else
    . execute-file-remote.sh $master install-cni-pluggin.sh
-     sleep 10
+     sleep_few_secs
    . execute-file-remote.sh $master test-commands.sh
 fi 
 
