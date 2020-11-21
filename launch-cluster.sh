@@ -36,15 +36,16 @@ else
   . execute-file-remote.sh $master kube-remove-master.sh
   . execute-file-remote.sh $master install-kubeadm.sh
   . execute-file-remote.sh $master kubeadm-init.sh
+  . copy-init-config-and-log.sh $master
 fi
 . prepare-cluster-join.sh
 #Worker installation
 for worker in $workers; do 
   if [ "$worker" = "$host" ] || [ "$worker" = "$host_ip" ]
 then 
-  print_msg "Installing docker on local worker"
+  print_msg "Installing docker on $worker"
   . install-docker.sh
-  print_msg "Installing kubeadm kubelet on local worker"
+  print_msg "Installing kubeadm kubelet on $worker"
   . kube-remove-worker.sh
   . install-kubeadm-worker.sh
   print_msg "$worker joining the cluster"

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash 
 sudo apt update
+sudo apt upgrade -y
 # (Install Docker CE)
 ## Set up the repository:
 ### Install packages to allow apt to use a repository over HTTPS
