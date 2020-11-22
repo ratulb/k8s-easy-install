@@ -16,7 +16,7 @@ then
 fi
 
 echo "\n"
-
+host=$(hostname)
 host_ip=$(hostname -i)
 print_msg "This host is : $host"
 print_msg "This host ip is : $host_ip"
