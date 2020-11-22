@@ -26,14 +26,14 @@ then
   print_msg "Installing docker on local master"
   . install-docker.sh
   print_msg "Installing kubeadm kubelet kubectl on local master"
-  . kube-remove-master.sh
+  . kube-remove.sh
   . install-kubeadm.sh
   . kubeadm-init.sh
 else 
   print_msg "Installing docker on remote master"
   . execute-file-remote.sh $master install-docker.sh
   print_msg "Installing kubeadm kubelet kubectl on remote master"
-  . execute-file-remote.sh $master kube-remove-master.sh
+  . execute-file-remote.sh $master kube-remove.sh
   . execute-file-remote.sh $master install-kubeadm.sh
   . execute-file-remote.sh $master kubeadm-init.sh
   . copy-init-config-and-log.sh $master
@@ -46,8 +46,8 @@ then
   print_msg "Installing docker on $worker"
   . install-docker.sh
   print_msg "Installing kubeadm kubelet on $worker"
-  . kube-remove-worker.sh
-  . install-kubeadm-worker.sh
+  . kube-remove.sh
+  . install-kubeadm.sh
   print_msg "$worker joining the cluster"
   . join-cluster.cmd
 else 

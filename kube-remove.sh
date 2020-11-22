@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-#sudo systemctl stop kubelet
 sudo kubeadm reset --force
 sudo rm -rf /etc/cni/net.d
 sudo rm -rf ~/.kube/

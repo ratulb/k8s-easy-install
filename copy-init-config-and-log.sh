@@ -1,5 +1,5 @@
 #!/usr/bin/env bash 
-sudo scp $1:~/kubeadm-init.log .
+scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $1:~/kubeadm-init.log .
 mkdir -p $HOME/.kube
-sudo scp $1:~/.kube/config  $HOME/.kube/config
-sudo chown $(id -u):$(id -g) $HOME/.kube/config
+scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $1:~/.kube/config  $HOME/.kube/config
+chown $(id -u):$(id -g) $HOME/.kube/config

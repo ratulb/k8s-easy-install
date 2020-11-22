@@ -4,7 +4,6 @@ cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
 EOF
-sudo echo 1 > /proc/sys/net/ipv4/ip_forward
 sudo sed -i 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/g' /etc/sysctl.conf
 sudo sysctl --system
 
@@ -16,9 +15,6 @@ EOF
 sudo apt-get update
 sudo apt-get install -y iptables
 sudo apt-get install -y kubelet kubeadm
-#sudo apt-mark unhold kubelet kubeadm
 
 sudo systemctl daemon-reload
 sudo systemctl restart kubelet
-
-
