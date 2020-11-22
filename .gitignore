@@ -1,2 +1,3 @@
 join-cluster.cmd
 kubeadm-init.log
+status-report

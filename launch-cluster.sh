@@ -1,7 +1,6 @@
 #!/usr/bin/env bash 
 . utils.sh
 
-"read_setup"
 print_msg "Configurations read from setup.conf"
 print_msg "Master: $master"
 print_msg "Workers: $workers"
@@ -23,16 +22,16 @@ print_msg "This host ip is : $host_ip"
 #Master installation
 if [ "$master" = "$host" ] || [ "$master" = "$host_ip" ]
 then 
-  print_msg "Installing docker on local master"
+  print_msg "Installing docker on master(this computer $master)"
   . install-docker.sh
-  print_msg "Installing kubeadm kubelet kubectl on local master"
+  print_msg "Installing kubeadm kubelet kubectl on master(this machine $master)"
   . kube-remove.sh
   . install-kubeadm.sh
   . kubeadm-init.sh
 else 
-  print_msg "Installing docker on remote master"
+  print_msg "Installing docker on remote master($master)"
   . execute-file-remote.sh $master install-docker.sh
-  print_msg "Installing kubeadm kubelet kubectl on remote master"
+  print_msg "Installing kubeadm kubelet kubectl on remote master($master)"
   . execute-file-remote.sh $master kube-remove.sh
   . execute-file-remote.sh $master install-kubeadm.sh
   . execute-file-remote.sh $master kubeadm-init.sh
@@ -54,12 +53,11 @@ else
   print_msg "Installing docker on $worker"
   . execute-file-remote.sh $worker install-docker.sh
   print_msg "Installing kubeadm kubelet on $worker"
-  . execute-file-remote.sh $worker kube-remove-worker.sh
+  . execute-file-remote.sh $worker kube-remove.sh
   . execute-file-remote.sh $worker install-kubeadm-worker.sh
   print_msg "$worker joining the cluster"
   . execute-file-remote.sh $worker join-cluster.cmd
 fi 
-
 done
 
 #Install cni-pluggin
@@ -74,8 +72,4 @@ if [ "$master" = "$host" ] || [ "$master" = "$host_ip" ]
      sleep_few_secs
    . execute-file-remote.sh $master test-commands.sh
 fi 
-
-	
-
-
 
