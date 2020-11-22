@@ -5,10 +5,10 @@ echo -e "\e[1;42mChecking cluster nodes status\e[0m"
 rm status-report
 kubectl get nodes | tee status-report
 status=$(cat status-report | awk '{if(NR>1)print}' | awk '{print $2}' | tr "\n" " ")
-i=30
+i=15
 while [ "$i" -gt 0 ] && [[ $status =~ "NotReady" ]] ; do
   sleep $i
-  i=$((i-10))
+  i=$((i-5))
   rm status-report
   kubectl get nodes | tee status-report
   status=$(cat status-report | awk '{if(NR>1)print}' | awk '{print $2}' | tr "\n" " ")
@@ -23,10 +23,10 @@ rm status-report
 kubectl get pods | tee status-report
 status=$(cat status-report | awk '{if(NR>1)print}' | awk '{print $3}' | tr "\n" " ")
 
-i=30
+i=15
 while [ "$i" -gt 0 ] && [[ ! $status =~ "Running Running Running" ]] ; do
   sleep $i
-  i=$((i-10))
+  i=$((i-5))
   rm status-report
   kubectl get pods | tee status-report
   status=$(cat status-report | awk '{if(NR>1)print}' | awk '{print $3}' | tr "\n" " ")

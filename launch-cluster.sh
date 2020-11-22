@@ -35,7 +35,7 @@ else
   . execute-file-remote.sh $master kube-remove.sh
   . execute-file-remote.sh $master install-kubeadm.sh
   . execute-file-remote.sh $master kubeadm-init.sh
-  . copy-init-config-and-log.sh $master
+  . copy-init-log.sh $master
 fi
 . prepare-cluster-join.sh
 #Worker installation
@@ -49,6 +49,7 @@ then
   . install-kubeadm.sh
   print_msg "$worker joining the cluster"
   . join-cluster.cmd
+  . copy-kube-config.sh $master
 else 
   print_msg "Installing docker on $worker"
   . execute-file-remote.sh $worker install-docker.sh
