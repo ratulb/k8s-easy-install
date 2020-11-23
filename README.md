@@ -11,9 +11,11 @@ Check out this repository.
 
 git clone https://github.com/ratulb/k8s-remote-install.git
 
-Edit setup.conf for master and worker nodes and then run the following script:
+Edit setup.conf for master and worker nodes:
 
 vi setup.conf
+
+And then run the following script:
 
 ./launch-cluster.sh
 
