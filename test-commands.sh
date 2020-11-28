@@ -13,7 +13,7 @@ while [ "$i" -gt 0 ] && [[ $status =~ "NotReady" ]] ; do
   kubectl get nodes | tee status-report
   status=$(cat status-report | awk '{if(NR>1)print}' | awk '{print $2}' | tr "\n" " ")
 done
-
+kubectl taint nodes --all node-role.kubernetes.io/master-
 echo -e "\e[1;42mDeploying a demo nginx pod\e[0m"
 kubectl apply -f https://raw.githubusercontent.com/ratulb/k8s-remote-install/main/nginx-deployment.yaml
 
