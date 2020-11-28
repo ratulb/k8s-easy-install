@@ -25,3 +25,9 @@ sleep_few_secs()
  print_msg "Sleeping few secs..."
  sleep $sleep_time
 }
+
+#Launch busybox container called debug
+k8_debug()
+{
+ kubectl run -i --tty --rm debug --image=busybox:1.28 --restart=Never -- sh 
+}
