@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 sudo kubeadm reset --force
+rm -rf /var/lib/etcd
 sudo rm -rf /etc/cni/net.d
 sudo rm -rf ~/.kube/
 sudo iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
