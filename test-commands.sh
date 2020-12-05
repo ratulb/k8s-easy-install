@@ -19,7 +19,7 @@ kubectl apply -f https://raw.githubusercontent.com/ratulb/k8s-remote-install/mai
 
 echo -e "\e[1;42mChecking pod status\e[0m"
 
-rm status-report
+rm status-report 2> /dev/null
 kubectl get pods | tee status-report
 status=$(cat status-report | awk '{if(NR>1)print}' | awk '{print $3}' | tr "\n" " ")
 
