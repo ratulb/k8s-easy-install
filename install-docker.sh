@@ -4,7 +4,7 @@ sudo apt upgrade -y
 # (Install Docker CE)
 ## Set up the repository:
 ### Install packages to allow apt to use a repository over HTTPS
-sudo apt-get update && sudo apt-get install -y \
+sudo apt update && sudo apt install -y \
   apt-transport-https ca-certificates curl software-properties-common gnupg2
   
 # Add Docker's official GPG key:
@@ -18,7 +18,7 @@ sudo add-apt-repository \
   stable"
   
 # Install Docker CE
-sudo apt-get update && sudo apt-get install -y \
+sudo apt update && sudo apt install -y \
   containerd.io=1.2.13-2 \
   docker-ce=5:19.03.11~3-0~ubuntu-$(lsb_release -cs) \
   docker-ce-cli=5:19.03.11~3-0~ubuntu-$(lsb_release -cs)
