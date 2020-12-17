@@ -73,4 +73,4 @@ if [ "$master" = "$host" ] || [ "$master" = "$host_ip" ]
      sleep_few_secs
    . execute-file-remote.sh $master test-commands.sh
 fi 
-./init-self.sh
+. init-self.sh
