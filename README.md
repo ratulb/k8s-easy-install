@@ -9,7 +9,7 @@ How to setup:
 
 Check this repository out. 
 
-git clone https://github.com/ratulb/k8s-remote-install.git
+git clone https://github.com/ratulb/k8s-easy-install.git
 
 
 cd k8s-remote-install && ./launch-cluster.sh (Single node cluster with localhost as master).
