@@ -12,7 +12,7 @@ Check this repository out.
 git clone https://github.com/ratulb/k8s-remote-install.git
 
 
-cd k8s-remote-install && ./launch.sh (Single node cluster with localhost as master).
+cd k8s-remote-install && ./launch-cluster.sh (Single node cluster with localhost as master).
 
 Or else:
 
@@ -28,8 +28,8 @@ And the cluster should be up and running with a nginx deployment.
 
 These steps have been verified on Ubuntu 16.04/18.04/20.04.
 
-Works on a cluster consisting of only a master node - but either master node's taint has to be removed or toleration has to be added to POD definitions for PODs to be deployable on a single node cluster. 
+Work in progress for multi-master cluster with seamless back and forth switch between embedded etcd and external etcd cluster.
 
-Cross reference: http://rbsomeg.blogspot.com/2020/11/setting-up-kubernetes-cluster-quickly.html
+Cross reference: http://rbsomeg.blogspot.com/2020/11/setting-up-kubernetes-cluster-ubuntu.html
 
 
