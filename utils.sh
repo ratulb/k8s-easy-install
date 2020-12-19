@@ -10,6 +10,7 @@ read_setup()
       "master") export master="$value" ;;
       "workers") export workers="$value" ;;
       "sleep_time") export sleep_time="$value" ;;
+      "CONTAINERD_VER") export CONTAINERD_VER="$value" ;;
       "#"*) ;;
 
     esac

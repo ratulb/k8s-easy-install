@@ -2,8 +2,7 @@
 #If this host is not part of the cluster 
 . utils.sh
 this_host_ip=$(hostname -i)
-
-if [ "$master" == *"$this_host_ip"*  -o "$workers" == *"$this_host_ip"* ]; then
+if [[ ( "$master" = "$this_host_ip" ) || ( "$workers" = *"$this_host_ip"* ) ]]; then
   exit 0
 fi
 
