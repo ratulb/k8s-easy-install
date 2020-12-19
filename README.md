@@ -11,6 +11,11 @@ Check this repository out.
 
 git clone https://github.com/ratulb/k8s-remote-install.git
 
+
+cd k8s-remote-install && ./launch.sh (Single node cluster with localhost as master).
+
+Or else:
+
 Edit setup.conf for master and worker nodes' IPs:
 
 vi setup.conf
