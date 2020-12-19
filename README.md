@@ -23,7 +23,7 @@ And the cluster should be up and running with a nginx deployment.
 
 Tested for ubuntu 16.04/18.04/20.04.
 
-Works on a cluster consisting of only a master node - but either master node's tain has to be removed or toleration has to be added to POD definitions for PODs to be deployable on a single node cluster. 
+Works on a cluster consisting of only a master node - but either master node's taint has to be removed or toleration has to be added to POD definitions for PODs to be deployable on a single node cluster. 
 
 Cross reference: http://rbsomeg.blogspot.com/2020/11/setting-up-kubernetes-cluster-quickly.html
 
