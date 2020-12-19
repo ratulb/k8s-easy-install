@@ -3,7 +3,7 @@ Setup a kubernetes cluster by running a simple script(Ansible is great and we lo
 
 Take the hassle out of logging into each machine to install docker(containerd based runtime lies in another branch), kube components & network plugin. Instead manage everything from a single machine.The machine from where the script is launched can be a part of the cluster too. 
 
-All that is required is the current machine's SSH public key should be added to the ~/.ssh/authorized_keys of the cluster machins.
+Add the the current machine's SSH public key to the ~/.ssh/authorized_keys of the cluster machins(only for multi-node cluster).
 
 How to setup:
 
@@ -12,7 +12,7 @@ Check this repository out.
 git clone https://github.com/ratulb/k8s-easy-install.git
 
 
-cd k8s-remote-install && ./launch-cluster.sh (Single node cluster with localhost as master).
+cd k8s-easy-install && ./launch-cluster.sh (Single node cluster with localhost as master).
 
 Or else:
 
