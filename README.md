@@ -1,5 +1,5 @@
 # k8s-remote-install
-Install a kubernetes cluster remotely via a single script.
+Install a kubernetes cluster remotely via a single script(Ansible is great and we love it but here we do without it).
 
 Take the hassle out of logging into each machine install docker, kube components & network plugin. Instead manage everything from a single machine.The machine from where the script is launched can be a part of the cluster too. Multi-master cluster is not supported currently.
 
