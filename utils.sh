@@ -42,7 +42,8 @@ k8_debug()
  kubectl run -i --tty --rm debug --image=busybox:1.28 --restart=Never -- sh 
 }
 
-function install_etcdctl
+
+function install_etcdctl()
 {
  ETCD_VER="3.4.14"
  ETCD_VER=${1:-$ETCD_VER}

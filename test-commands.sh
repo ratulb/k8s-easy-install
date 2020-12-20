@@ -14,7 +14,7 @@ while [ "$i" -gt 0 ] && [[ $status =~ "NotReady" ]] ; do
   status=$(cat status-report | awk '{if(NR>1)print}' | awk '{print $2}' | tr "\n" " ")
 done
 
-master_node=$(kubectl get nodes --no-headers | grep -m1 master | awk '{print $1}')
+master_node=$(kubectl get nodes --no-headers | grep 'control-plane,master' | awk '{print $1}')
 
 kubectl taint nodes $master_node node-role.kubernetes.io/master-
 echo -e "\e[1;42mDeploying a demo nginx pod\e[0m"
