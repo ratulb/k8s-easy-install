@@ -19,6 +19,7 @@ read_setup()
   if [ -z $master ]; then
     export master=$(echo $(hostname -i) | cut -d ' ' -f 1)
   fi
+  sed -i "s|#CONTAINERD_VER#|$CONTAINERD_VER|g" install-containerd.sh
 }
 
 "read_setup"

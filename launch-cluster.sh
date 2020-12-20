@@ -23,7 +23,7 @@ print_msg "This host ip is : $host_ip"
 #Master installation
 if [ "$master" = "$host" ] || [ "$master" = "$host_ip" ]
 then 
-  print_msg "Installing docker on master(this computer $master)"
+  print_msg "Installing containerd on master(this computer $master)"
   . install-containerd.sh
   print_msg "Installing kubeadm kubelet kubectl on master(this machine $master)"
   . kube-remove.sh
@@ -31,7 +31,7 @@ then
   . kubeadm-init.sh
   . configure-cgroup-driver.sh
 else 
-  print_msg "Installing docker on remote master($master)"
+  print_msg "Installing containerd on remote master($master)"
   . execute-file-remote.sh $master install-containerd.sh
   print_msg "Installing kubeadm kubelet kubectl on remote master($master)"
   . execute-file-remote.sh $master kube-remove.sh
@@ -45,7 +45,7 @@ fi
 for worker in $workers; do 
   if [ "$worker" = "$host" ] || [ "$worker" = "$host_ip" ]
 then 
-  print_msg "Installing docker on $worker"
+  print_msg "Installing containerd on $worker"
   . install-containerd.sh
   print_msg "Installing kubeadm kubelet on $worker"
   . kube-remove.sh
@@ -55,7 +55,7 @@ then
   . configure-cgroup-driver.sh
   . copy-kube-config.sh $master
 else 
-  print_msg "Installing docker on $worker"
+  print_msg "Installing containerd on $worker"
   . execute-file-remote.sh $worker install-containerd.sh
   print_msg "Installing kubeadm kubelet on $worker"
   . execute-file-remote.sh $worker kube-remove.sh
