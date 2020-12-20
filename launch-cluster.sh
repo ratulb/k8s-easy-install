@@ -1,11 +1,12 @@
 #!/usr/bin/env bash 
 . utils.sh
 
-print_msg "Configurations read from setup.conf"
+print_msg "Master and worker configurations:"
+
 print_msg "Master: $master"
 print_msg "Workers: $workers"
-print_msg "Please make sure $HOME/.ssh/id_rsa.pub SSH public key has been copied \
-to remote machines!"
+
+print_msg "For remote hosts - make sure $(whoami)'s  SSH public key has been copied to them before proceeding!"
 
 read -p "Proceed with installation? " -n 1 -r
 if [[ ! $REPLY =~ ^[Yy]$ ]]
@@ -14,7 +15,7 @@ then
     exit 1
 fi
 
-echo "\n"
+echo ""
 host=$(hostname)
 host_ip=$(hostname -i)
 print_msg "This host is : $host"

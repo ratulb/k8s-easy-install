@@ -15,6 +15,10 @@ read_setup()
 
     esac
   done < "setup.conf"
+
+  if [ -z $master ]; then
+    export master=$(echo $(hostname -i) | cut -d ' ' -f 1)
+  fi
 }
 
 "read_setup"
