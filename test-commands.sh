@@ -2,7 +2,7 @@
 #Commands for testing the cluster setup
 
 echo -e "\e[1;42mChecking cluster nodes status\e[0m"
-rm status-report
+rm -f status-report
 kubectl get nodes | tee status-report
 status=$(cat status-report | awk '{if(NR>1)print}' | awk '{print $2}' | tr "\n" " ")
 i=15
@@ -41,3 +41,4 @@ sed -i '/source <(kubectl completion bash)/d'  ~/.bashrc
 echo 'source <(kubectl completion bash)' >>~/.bashrc
 
 source ~/.bashrc
+rm -f status-report
