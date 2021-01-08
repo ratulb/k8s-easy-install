@@ -11,7 +11,7 @@ home_url=$(sudo cat /etc/*release | grep HOME_URL | cut -d'"' -f2)
 if [ "$home_url" = "https://www.ubuntu.com/" ]; then
   curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
   version_id=$(sudo cat /etc/*release | grep VERSION_ID | cut -d'"' -f2)
-  if [ "$version_id" =~ "20" ]; then
+  if [[ "$version_id" =~ *"20"* ]]; then
     sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu eoan stable"
   else
     sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
