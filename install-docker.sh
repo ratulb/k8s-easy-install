@@ -17,13 +17,15 @@ if [ -f /etc/debian_version ]; then
 else
   curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo \
     apt-key --keyring /etc/apt/trusted.gpg.d/docker.gpg add -
-
   # Add the Docker apt repository:
-  sudo add-apt-repository \
-    "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
-  $(lsb_release -cs) \
-  stable"
-
+  sudo cat /etc/*release | grep VERSION_ID=\"20.04\"
+  if [ "$?" -eq 0 ]; then
+    sudo add-apt-repository \
+      "deb [arch=amd64] https://download.docker.com/linux/ubuntu eoan stable"
+  else
+    sudo add-apt-repository \
+      "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+  fi
   # Install Docker CE
   sudo apt update && sudo apt install -y \
     containerd.io=1.2.13-2 \
