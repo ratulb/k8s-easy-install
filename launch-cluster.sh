@@ -8,7 +8,7 @@ print_msg "Workers: $workers"
 
 print_msg "For remote hosts - make sure $(whoami)'s  SSH public key has been copied to them before proceeding!"
 
-read -p "Proceed with installation? " -n 1 -r
+read -p "Proceed with installation(y)? " -n 1 -r
 if [[ ! $REPLY =~ ^[Yy]$ ]]
 then
     print_msg "\nAborted cluster setup\n"
