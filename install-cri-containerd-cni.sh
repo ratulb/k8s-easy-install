@@ -2,7 +2,7 @@
 
 sudo apt update
 
-echo -e "\e[1;42mInstalling cri-containerd-cni.\e[0m"
+echo -e "\e[1;32mInstalling cri-containerd-cni.\e[0m"
 
 sudo systemctl stop containerd
 sudo systemctl disable containerd
@@ -31,5 +31,5 @@ sudo systemctl daemon-reload
 sudo systemctl start containerd
 sudo systemctl enable containerd
 
-echo -e "\e[1;42mInstalled cri-containerd-cni.\e[0m"
+echo -e "\e[1;32mInstalled cri-containerd-cni.\e[0m"
 
