@@ -8,4 +8,5 @@ sudo rm -rf /var/lib/kubelet/
 sudo iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
 sudo apt purge -y kubeadm kubelet kubectl
 sudo apt autoremove -y
+sudo rm -rf /opt/cni/bin
 sudo ps -ef | grep kube-apiserver | grep -v grep | awk '{print $2}' | xargs kill -9 &> /dev/null

@@ -14,8 +14,7 @@ deb https://apt.kubernetes.io/ kubernetes-xenial main
 EOF
 sudo apt update
 sudo apt install -y iptables
-sudo apt install -y kubelet kubeadm kubectl
-#sudo apt install -y kubeadm
+sudo apt install -y kubeadm
 
 sudo systemctl daemon-reload
 sudo systemctl restart kubelet

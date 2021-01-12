@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
+. utils.sh
 #Commands for testing the cluster setup
 
-echo -e "\e[1;42mChecking cluster nodes status\e[0m"
+print_msg "checking cluster nodes status"
 rm -f status-report
 kubectl get nodes | tee status-report
 status=$(cat status-report | awk '{if(NR>1)print}' | awk '{print $2}' | tr "\n" " ")
@@ -17,11 +18,11 @@ done
 master_node=$(kubectl get nodes --no-headers | grep 'control-plane,master' | awk '{print $1}')
 
 kubectl taint nodes $master_node node-role.kubernetes.io/master-
-echo -e "\e[1;42mDeploying a demo nginx pod\e[0m"
+print_msg "Deploying a demo nginx pod"
 
 kubectl apply -f https://raw.githubusercontent.com/ratulb/k8s-remote-install/main/nginx-deployment.yaml
 
-echo -e "\e[1;42mChecking pod status\e[0m"
+print_msg "Checking pod status"
 
 rm status-report 2> /dev/null
 kubectl get pods | tee status-report
@@ -36,8 +37,3 @@ while [ "$i" -gt 0 ] && [[ ! $status =~ "Running Running Running" ]] ; do
   status=$(cat status-report | awk '{if(NR>1)print}' | awk '{print $3}' | tr "\n" " ")
 done
 
-#Setup bash completion
-sed -i '/source <(kubectl completion bash)/d'  ~/.bashrc
-echo 'source <(kubectl completion bash)' >>~/.bashrc
-
-source ~/.bashrc
