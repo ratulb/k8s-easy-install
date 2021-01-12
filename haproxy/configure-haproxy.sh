@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 . utils.sh
 
 rm -f /tmp/backends.txt
@@ -27,7 +28,7 @@ backend kube-apiserver-nodes
 EOF
 cp haproxy/haproxy.cfg haproxy.draft
 
-cat /tmp/haproxy.config.snippet >>haproxy.draft
+cat /tmp/haproxy.config.snippet >> haproxy.draft
 if [[ "$this_host_ip" = "$loadbalancer" ]] || [[ "$this_host_name" = "$loadbalancer" ]]; then
   mv haproxy.draft /etc/haproxy/haproxy.cfg
 else

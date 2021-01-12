@@ -3,6 +3,10 @@
 
 print_msg "Master and worker configurations:"
 
+if [ ! -z "$loadbalancer" ]; then
+  print_msg "Load balancer: $loadbalancer"
+fi
+
 if [ ! -z "$master" ]; then
   print_msg "Master: $master"
 fi
@@ -15,7 +19,7 @@ fi
 
 print_msg "For remote hosts - make sure $this_host_ip's  SSH public key has been copied to them before proceeding!"
 
-read -p "Proceed with installation? " -n 1 -r
+read -p "Proceed with installation(y)? " -n 1 -r
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
   print_msg "\nAborted cluster setup\n"
   return 1
@@ -48,7 +52,11 @@ if [ ! -z "$workers" ]; then
     fi
   done
 fi
-
+cp kubeadm-init.sh kubeadm-init.sh.tmp
+sed -i "s/#masters#/'$masters'/g" kubeadm-init.sh.tmp
+sed -i "s/#lb_port#/$lb_port/g" kubeadm-init.sh.tmp
+sed -i "s/#pod_network_cidr#/$pod_network_cidr/g" kubeadm-init.sh.tmp
+sed -i "s/#loadbalancer#/$loadbalancer/g" kubeadm-init.sh.tmp
 unset copy_kube_conf_from
 echo ""
 if [ -z "$masters" ]; then
@@ -59,7 +67,7 @@ if [ -z "$masters" ]; then
     print_msg "Installing kubeadm kubelet kubectl on master(this machine $master)"
     . kube-remove.sh
     . install-kubeadm.sh
-    . kubeadm-init.sh
+    . kubeadm-init.sh.tmp
     . configure-cgroup-driver.sh
   else
     print_msg "Installing cri containerd cni on remote master($master)"
@@ -67,7 +75,7 @@ if [ -z "$masters" ]; then
     print_msg "Installing kubeadm kubelet kubectl on remote master($master)"
     . execute-script-remote.sh $master kube-remove.sh
     . execute-script-remote.sh $master install-kubeadm.sh
-    . execute-script-remote.sh $master kubeadm-init.sh
+    . execute-script-remote.sh $master kubeadm-init.sh.tmp
     . execute-script-remote.sh $master configure-cgroup-driver.sh
     . copy-init-log.sh $master
   fi
@@ -87,7 +95,7 @@ else
       . kube-remove.sh
       . install-kubeadm.sh
       if [ "$count" -eq 0 ]; then
-        . kubeadm-init.sh
+        . kubeadm-init.sh.tmp
       else
         . master-join-cluster.cmd
       fi
@@ -99,9 +107,10 @@ else
       . execute-script-remote.sh $_master kube-remove.sh
       . execute-script-remote.sh $_master install-kubeadm.sh
       if [ "$count" -eq 0 ]; then
-        . execute-script-remote.sh $_master kubeadm-init.sh
+        . execute-script-remote.sh $_master kubeadm-init.sh.tmp
         . copy-init-log.sh $_master
-      else
+      else 
+	 cat master-join-cluster.cmd
         . execute-script-remote.sh $_master master-join-cluster.cmd
       fi
       . execute-script-remote.sh $_master configure-cgroup-driver.sh

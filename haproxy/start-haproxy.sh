@@ -3,7 +3,7 @@
 
 print_msg "Starting haproxy on $loadbalancer"
 if [ "$this_host_ip" != "$loadbalancer" ]; then
-  . execute-command-remote.sh echo 'net.ipv4.ip_nonlocal_bind=1' >>/etc/sysctl.conf
+  . execute-command-remote.sh $loadbalancer echo 'net.ipv4.ip_nonlocal_bind=1' >>/etc/sysctl.conf
   . execute-command-remote.sh $loadbalancer sysctl -p
   . execute-command-remote.sh $loadbalancer systemctl daemon-reload
   . execute-command-remote.sh $loadbalancer systemctl stop haproxy

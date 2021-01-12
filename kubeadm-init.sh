@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+masters=#masters#
+pod_network_cidr=#pod_network_cidr#
+loadbalancer=#loadbalancer#
+lb_port=#lb_port#
+
 if [ -z "$masters" ]; then
   sudo kubeadm init | sudo tee kubeadm-init.log
 else

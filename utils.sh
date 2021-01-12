@@ -3,6 +3,7 @@ export usr=$(whoami)
 read_setup() {
   master=
   workers=
+  masters=
   while IFS="=" read -r key value; do
     case "$key" in
       "master") export master="$value" ;;
@@ -48,7 +49,7 @@ can_access_ip() {
   if [ "$1" = "$this_host_ip" ]; then
     return 0
   else
-    . execute-command-remote.sh $1 ls -la &>/dev/null
+    sudo -u $usr ssh -o "StrictHostKeyChecking=no" -o "ConnectTimeout=5" $1 "ls -la &> /dev/null"
   fi
 }
 
@@ -64,5 +65,4 @@ function install_etcdctl() {
   mv /tmp/etcd-download-loc/etcdctl /usr/local/bin
   which etcdctl
   etcdctl version
-
 }
