@@ -14,8 +14,8 @@ sudo apt install libseccomp2
 rm -rf $HOME/containerd_download/
 mkdir $HOME/containerd_download/
 
-wget -q https://storage.googleapis.com/cri-containerd-release/cri-containerd-cni-1.3.4.linux-amd64.tar.gz -O $HOME/containerd_download/cri-containerd-cni-1.3.4.linux-amd64.tar.gz
-sudo tar --no-overwrite-dir -C / -xzf $HOME/containerd_download/cri-containerd-cni-1.3.4.linux-amd64.tar.gz
+wget -q https://storage.googleapis.com/cri-containerd-release/cri-containerd-cni-#CONTAINERD_VER#.linux-amd64.tar.gz -O $HOME/containerd_download/cri-containerd-cni-#CONTAINERD_VER#.linux-amd64.tar.gz
+sudo tar --no-overwrite-dir -C / -xzf $HOME/containerd_download/cri-containerd-cni-#CONTAINERD_VER#.linux-amd64.tar.gz
 
 cat <<EOF | sudo tee /etc/modules-load.d/containerd.conf
 overlay
