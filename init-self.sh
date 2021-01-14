@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 #If this host is not part of the cluster
 . utils.sh
-
-if [[ "$master" = "$this_host_ip" ]] || [[ "$workers" = *"$this_host_ip"* ]] || [[ "$masters" = *"$this_host_ip"* ]]; then
-  return 0
+if [ -z "$debug" ]; then
+  if [[ "$master" = "$this_host_ip" ]] || [[ "$workers" = *"$this_host_ip"* ]] || [[ "$masters" = *"$this_host_ip"* ]]; then
+    return 0
+  fi
 fi
-
 curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
 
 chmod +x ./kubectl

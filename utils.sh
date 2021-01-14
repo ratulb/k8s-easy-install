@@ -14,6 +14,7 @@ read_setup() {
       "pod_network_cidr") export pod_network_cidr="$value" ;;
       "sleep_time") export sleep_time="$value" ;;
       "cri_containerd_cni_ver") export CONTAINERD_VER="$value" ;;
+      "wait_interval_post_join_cmd") export wait_interval_post_join_cmd="$value" ;;
       "#"*) ;;
 
     esac

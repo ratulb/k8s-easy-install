@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-sudo kubeadm reset --cri-socket=/run/containerd/containerd.sock --force
+sudo kubeadm reset --force --cri-socket=/run/containerd/containerd.sock
 rm -rf /var/lib/etcd
 sudo rm -rf /etc/cni/net.d
 sudo rm -rf ~/.kube/

@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
 . utils.sh
 
+if [[ -z "$master" ]] && [[ -z "$masters" ]]; then
+  err "No master or masters provided"
+  exit 1
+fi
+
+if [[ ! -z "$master" ]] && [[ ! -z "$masters" ]]; then
+  err "Both master and masters are provided! Only one is allowed"
+  exit 1
+fi
+
 print_msg "Master and worker configurations:"
 
 if [ ! -z "$loadbalancer" ]; then
@@ -57,6 +67,8 @@ sed -i "s/#masters#/'$masters'/g" kubeadm-init.sh.tmp
 sed -i "s/#lb_port#/$lb_port/g" kubeadm-init.sh.tmp
 sed -i "s/#pod_network_cidr#/$pod_network_cidr/g" kubeadm-init.sh.tmp
 sed -i "s/#loadbalancer#/$loadbalancer/g" kubeadm-init.sh.tmp
+cp master-join-monitor.cmd mjm.cmd.tmp
+sed -i "s|#wait_interval_post_join_cmd#|$wait_interval_post_join_cmd|g" mjm.cmd.tmp
 unset copy_kube_conf_from
 echo ""
 if [ -z "$masters" ]; then
@@ -92,12 +104,13 @@ else
       print_msg "Installing kubeadm kubelet kubectl on master(this machine $_master)"
       . kube-remove.sh
       . install-kubeadm.sh
-       print_msg "Installing cri containerd cni on master(this computer $_master)"
+      print_msg "Installing cri containerd cni on master(this computer $_master)"
       . install-cri-containerd-cni.sh
       if [ "$count" -eq 0 ]; then
         . kubeadm-init.sh.tmp
+        . install-cni-pluggin.sh
       else
-        . master-join-cluster.cmd
+        . mjm.cmd.tmp
       fi
       . configure-cgroup-driver.sh
     else
@@ -109,8 +122,9 @@ else
       if [ "$count" -eq 0 ]; then
         . execute-script-remote.sh $_master kubeadm-init.sh.tmp
         . copy-init-log.sh $_master
-      else 
-        . execute-script-remote.sh $_master master-join-cluster.cmd
+        . execute-script-remote.sh $_master install-cni-pluggin.sh
+      else
+        . execute-return-script-remote.sh $_master mjm.cmd.tmp
       fi
       . execute-script-remote.sh $_master configure-cgroup-driver.sh
     fi
@@ -127,7 +141,7 @@ for worker in $workers; do
     print_msg "Installing kubeadm kubelet kubectl on worker $worker"
     . kube-remove.sh
     . install-kubeadm.sh
-     print_msg "Installing cri containerd cni on worker $worker"
+    print_msg "Installing cri containerd cni on worker $worker"
     . install-cri-containerd-cni.sh
     print_msg "$worker joining the cluster"
     . worker-join-cluster.cmd
