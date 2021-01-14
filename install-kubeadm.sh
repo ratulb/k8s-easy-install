@@ -17,6 +17,6 @@ sudo apt install -y iptables
 sudo apt install -y kubeadm
 
 sudo systemctl daemon-reload
-sudo systemctl restart kubelet
+#sudo systemctl restart kubelet
 
 echo "Kubeadm install has completed"

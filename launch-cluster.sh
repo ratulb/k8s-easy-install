@@ -62,19 +62,19 @@ echo ""
 if [ -z "$masters" ]; then
   copy_kube_conf_from=$master
   if [ "$master" = "$this_host_name" ] || [ "$master" = "$this_host_ip" ]; then
-    print_msg "Installing cri containerd cni on master(this computer $master)"
-    . install-cri-containerd-cni.sh
     print_msg "Installing kubeadm kubelet kubectl on master(this machine $master)"
     . kube-remove.sh
     . install-kubeadm.sh
+    print_msg "Installing cri containerd cni on master(this computer $master)"
+    . install-cri-containerd-cni.sh
     . kubeadm-init.sh.tmp
     . configure-cgroup-driver.sh
   else
-    print_msg "Installing cri containerd cni on remote master($master)"
-    . execute-script-remote.sh $master install-cri-containerd-cni.sh
     print_msg "Installing kubeadm kubelet kubectl on remote master($master)"
     . execute-script-remote.sh $master kube-remove.sh
     . execute-script-remote.sh $master install-kubeadm.sh
+    print_msg "Installing cri containerd cni on remote master($master)"
+    . execute-script-remote.sh $master install-cri-containerd-cni.sh
     . execute-script-remote.sh $master kubeadm-init.sh.tmp
     . execute-script-remote.sh $master configure-cgroup-driver.sh
     . copy-init-log.sh $master
@@ -89,11 +89,11 @@ else
   copy_kube_conf_from=$(echo $masters | cut -d ' ' -f1)
   for _master in $masters; do
     if [ "$_master" = "$this_host_name" ] || [ "$_master" = "$this_host_ip" ]; then
-      print_msg "Installing cri containerd cni on master(this computer $_master)"
-      . install-cri-containerd-cni.sh
       print_msg "Installing kubeadm kubelet kubectl on master(this machine $_master)"
       . kube-remove.sh
       . install-kubeadm.sh
+       print_msg "Installing cri containerd cni on master(this computer $_master)"
+      . install-cri-containerd-cni.sh
       if [ "$count" -eq 0 ]; then
         . kubeadm-init.sh.tmp
       else
@@ -101,16 +101,15 @@ else
       fi
       . configure-cgroup-driver.sh
     else
-      print_msg "Installing cri containerd cni on remote master($_master)"
-      . execute-script-remote.sh $_master install-cri-containerd-cni.sh
       print_msg "Installing kubeadm kubelet kubectl on remote master($_master)"
       . execute-script-remote.sh $_master kube-remove.sh
       . execute-script-remote.sh $_master install-kubeadm.sh
+      print_msg "Installing cri containerd cni on remote master($_master)"
+      . execute-script-remote.sh $_master install-cri-containerd-cni.sh
       if [ "$count" -eq 0 ]; then
         . execute-script-remote.sh $_master kubeadm-init.sh.tmp
         . copy-init-log.sh $_master
       else 
-	 cat master-join-cluster.cmd
         . execute-script-remote.sh $_master master-join-cluster.cmd
       fi
       . execute-script-remote.sh $_master configure-cgroup-driver.sh
@@ -125,21 +124,21 @@ fi
 first_master=$(echo $masters | cut -d ' ' -f1)
 for worker in $workers; do
   if [ "$worker" = "$this_host_name" ] || [ "$worker" = "$this_host_ip" ]; then
-    print_msg "Installing containerd on $worker"
-    . install-cri-containerd-cni.sh
-    print_msg "Installing kubeadm kubelet on $worker"
+    print_msg "Installing kubeadm kubelet kubectl on worker $worker"
     . kube-remove.sh
     . install-kubeadm.sh
+     print_msg "Installing cri containerd cni on worker $worker"
+    . install-cri-containerd-cni.sh
     print_msg "$worker joining the cluster"
     . worker-join-cluster.cmd
     . configure-cgroup-driver.sh
     . copy-kube-config.sh $copy_kube_conf_from
   else
-    print_msg "Installing containerd on $worker"
-    . execute-script-remote.sh $worker install-cri-containerd-cni.sh
-    print_msg "Installing kubeadm kubelet on $worker"
+    print_msg "Installing kubeadm kubelet kubectl on worker $worker"
     . execute-script-remote.sh $worker kube-remove.sh
     . execute-script-remote.sh $worker install-kubeadm.sh
+    print_msg "Installing cri containerd cni on $worker"
+    . execute-script-remote.sh $worker install-cri-containerd-cni.sh
     print_msg "$worker joining the cluster"
     . execute-script-remote.sh $worker worker-join-cluster.cmd
     . execute-script-remote.sh $worker configure-cgroup-driver.sh
