@@ -5,3 +5,4 @@ master-join-cluster.cmd
 master-join-monitor.cmd
 mjm.cmd.tmp
 worker-join-cluster.cmd
+haproxy.draft

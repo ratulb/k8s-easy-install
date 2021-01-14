@@ -36,6 +36,9 @@ sudo mkdir -p  /etc/systemd/system/kubelet.service.d/
 #Environment="KUBELET_EXTRA_ARGS=--cgroup-driver=systemd --container-runtime=remote --runtime-request-timeout=15m --container-runtime-endpoint=unix:///run/containerd/containerd.sock"
 #EOF
 
+sudo mkdir -p /etc/containerd
+sudo cp config.toml /etc/containerd/
+
 # Apply sysctl params without reboot
 sudo systemctl daemon-reload
 sudo sysctl --system
