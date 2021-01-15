@@ -67,8 +67,8 @@ sed -i "s/#masters#/'$masters'/g" kubeadm-init.sh.tmp
 sed -i "s/#lb_port#/$lb_port/g" kubeadm-init.sh.tmp
 sed -i "s/#pod_network_cidr#/$pod_network_cidr/g" kubeadm-init.sh.tmp
 sed -i "s/#loadbalancer#/$loadbalancer/g" kubeadm-init.sh.tmp
-cp master-join-monitor.cmd mjm.cmd.tmp
-sed -i "s|#wait_interval_post_join_cmd#|$wait_interval_post_join_cmd|g" mjm.cmd.tmp
+#cp master-join-monitor.cmd mjm.cmd.tmp
+#sed -i "s|#wait_interval_post_join_cmd#|$wait_interval_post_join_cmd|g" mjm.cmd.tmp
 unset copy_kube_conf_from
 echo ""
 if [ -z "$masters" ]; then
@@ -93,9 +93,24 @@ if [ -z "$masters" ]; then
   fi
   . prepare-cluster-join.sh
 else
-  . haproxy/install-haproxy.sh
-  . haproxy/configure-haproxy.sh
-  . haproxy/start-haproxy.sh
+  case $lb_type in
+    haproxy)
+      . haproxy/install-haproxy.sh
+      . haproxy/configure-haproxy.sh
+      . haproxy/start-haproxy.sh
+      ;;
+    nginx)
+      . nginx/install-nginx.sh
+      . nginx/configure-nginx.sh
+      . nginx/start-nginx.sh
+      ;;
+    envoy)
+      print_msg "To be done"
+      ;;
+    *)
+      err "This case is not handled yet"
+      ;;
+  esac
   count=0
   #Masters' installation
   copy_kube_conf_from=$(echo $masters | cut -d ' ' -f1)
@@ -110,7 +125,7 @@ else
         . kubeadm-init.sh.tmp
         . install-cni-pluggin.sh
       else
-        . mjm.cmd.tmp
+        . master-join-cluster.cmd
       fi
       . configure-cgroup-driver.sh
     else
@@ -124,7 +139,7 @@ else
         . copy-init-log.sh $_master
         . execute-script-remote.sh $_master install-cni-pluggin.sh
       else
-        . execute-return-script-remote.sh $_master mjm.cmd.tmp
+        . execute-script-remote.sh $_master master-join-cluster.cmd
       fi
       . execute-script-remote.sh $_master configure-cgroup-driver.sh
     fi

@@ -11,6 +11,7 @@ read_setup() {
       "loadbalancer") export loadbalancer="$value" ;;
       "workers") export workers="$value" ;;
       "lb_port") export lb_port="$value" ;;
+      "lb_type") export lb_type="$value" ;;
       "pod_network_cidr") export pod_network_cidr="$value" ;;
       "sleep_time") export sleep_time="$value" ;;
       "cri_containerd_cni_ver") export CONTAINERD_VER="$value" ;;
