@@ -5,14 +5,14 @@
 print_msg "checking cluster nodes status"
 rm -f status-report
 kubectl get nodes | tee status-report
-status=$(cat status-report | awk '{if(NR>1)print}' | awk '{print $2}' | tr "\n" " ")
+status=$(cat status-report | awk '{if(NR>1)print}' | awk '{print $3}' | sort -u | tr "\n" " " | xargs)
 i=15
-while [ "$i" -gt 0 ] && [[ $status =~ "NotReady" ]] ; do
+while [ "$i" -gt 0 ] && [[ ! $status = "NotReady" ]] ; do
   sleep $i
   i=$((i-5))
   rm status-report
   kubectl get nodes | tee status-report
-  status=$(cat status-report | awk '{if(NR>1)print}' | awk '{print $2}' | tr "\n" " ")
+  status=$(cat status-report | awk '{if(NR>1)print}' | awk '{print $3}' | sort -u | tr "\n" " " | xargs)
 done
 
 master_node=$(kubectl get nodes --no-headers | grep 'control-plane,master' | awk '{print $1}')
