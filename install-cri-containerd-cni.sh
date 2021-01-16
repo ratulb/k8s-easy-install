@@ -4,7 +4,7 @@ sudo apt update
 command -v wget &> /dev/null
 [ $? -eq 0 ] || sudo apt install -y wget 
 
-echo -e "\e[1;32mInstalling cri-containerd-cni.\e[0m"
+echo -e "\e[1;32mInstalling cri-containerd-cni on $(hostname)($(hostname -i)).\e[0m"
 
 sudo systemctl stop containerd
 sudo systemctl disable containerd
@@ -31,10 +31,6 @@ sudo modprobe br_netfilter
 sudo echo "KUBELET_EXTRA_ARGS=--cgroup-driver=systemd" > /etc/default/kubelet
 
 sudo mkdir -p  /etc/systemd/system/kubelet.service.d/
-#cat << EOF | sudo tee  /etc/systemd/system/kubelet.service.d/0-containerd.conf
-#[Service]                                                 
-#Environment="KUBELET_EXTRA_ARGS=--cgroup-driver=systemd --container-runtime=remote --runtime-request-timeout=15m --container-runtime-endpoint=unix:///run/containerd/containerd.sock"
-#EOF
 
 sudo mkdir -p /etc/containerd
 sudo cp config.toml /etc/containerd/
@@ -52,5 +48,5 @@ if [ ! -z "$pod_ids" ]; then
   crictl stopp $pod_ids && crictl rmp $pod_ids
 fi
 
-echo -e "\e[1;32mInstalled cri-containerd-cni.\e[0m"
+echo -e "\e[1;32mInstalled cri-containerd-cni on $(hostname)($(hostname -i)).\e[0m"
 

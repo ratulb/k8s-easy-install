@@ -42,6 +42,18 @@ sleep_few_secs() {
   sleep $sleep_time
 }
 
+is_ip() {
+  local address=$1
+  local rx='([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])'
+  if [[ "$address" =~ ^$rx\.$rx\.$rx\.$rx$ ]]; then
+    print_msg "$address is valid ip"
+    return 0
+  else
+    err "$address is not valid ip"
+    return 1
+  fi
+}
+
 #Launch busybox container called debug
 k8_debug() {
   print_msg "Setting up busybox debug container"

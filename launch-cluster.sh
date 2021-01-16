@@ -105,7 +105,9 @@ else
       . nginx/start-nginx.sh
       ;;
     envoy)
-      print_msg "To be done"
+      . envoy/install-envoy.sh
+      . envoy/configure-envoy.sh
+      . envoy/start-envoy.sh
       ;;
     *)
       err "This case is not handled yet"
