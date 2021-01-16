@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 echo -e "\e[1;32mRemoving kubernetes on $(hostname)($(hostname -i))\e[0m"
 sudo kubeadm reset --force --cri-socket=/run/containerd/containerd.sock
-rm -rf /var/lib/etcd
+sudo rm -rf /var/lib/etcd
 sudo rm -rf /etc/cni/net.d
 sudo rm -rf ~/.kube/
 sudo rm -rf /etc/kubernetes/
