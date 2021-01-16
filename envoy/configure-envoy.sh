@@ -26,8 +26,8 @@ cat envoy/envoy-template-2.yaml >> envoy.draft
 
 if [[ "$this_host_ip" = "$loadbalancer" ]] || [[ "$this_host_name" = "$loadbalancer" ]]; then
   sudo mkdir -p /etc/envoy
-  cp envoy.draft /etc/envoy/envoy.yaml
-  cp envoy/envoy.service /etc/systemd/system/
+  sudo cp envoy.draft /etc/envoy/envoy.yaml
+  sudo cp envoy/envoy.service /etc/systemd/system/
 else
   . execute-command-remote.sh $loadbalancer mkdir -p /etc/envoy
   sudo -u $usr scp envoy.draft $loadbalancer:/etc/envoy/envoy.yaml
