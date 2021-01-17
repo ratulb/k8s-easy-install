@@ -28,10 +28,10 @@ select option in "${!setupActions[@]}"; do
         PS3=$'\e[01;32mSingle master setup: \e[0m'
         single_master_setup_options=("Master ip" "Back" "Worker ips(s)" "Launch")
         select smc_option in "${single_master_setup_options[@]}"; do
-          if [[ "$smc_option" = "Cancel" ]]; then
-            PS3=$'\e[01;32mSelection: \e[0m'
-            break
-          fi
+          #if [[ "$smc_option" = "Cancel" ]]; then
+           # PS3=$'\e[01;32mSelection: \e[0m'
+            #break
+          #fi
           if ! [[ "$REPLY" =~ $re ]] || [ "$REPLY" -gt 4 -o "$REPLY" -lt 1 ]; then
             err "Invalid selection"
           else
@@ -72,7 +72,7 @@ select option in "${!setupActions[@]}"; do
                 rm -f /tmp/master-ip-single-master-cluster.txt
                 rm -f /tmp/worker-ips-single-master-cluster.txt
                 unset masterIp
-                err "Cancelled"
+                echo "Existed single master setup"
                 PS3=$'\e[01;32mSelection: \e[0m'
                 break
                 ;;
@@ -374,7 +374,7 @@ select option in "${!setupActions[@]}"; do
               PS3=$'\e[01;32mMulti master cluster: \e[0m'
               ;;
             'Back')
-              err "Cancelled setup"
+              echo "Exited multi-master setup"
               rm -f /tmp/selected_lb_type.txt
               rm -f /tmp/lb_addr_and_port.txt
               rm -f /tmp/master-ips-multi-master-cluster.txt
