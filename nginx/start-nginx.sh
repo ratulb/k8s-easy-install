@@ -4,7 +4,7 @@
 . haproxy/stop-haproxy.sh
 . envoy/stop-envoy.sh
 
-print_msg "Starting nginx on $loadbalancer"
+prnt "Starting nginx on $loadbalancer"
 if [ "$this_host_ip" != "$loadbalancer" ]; then
   . execute-command-remote.sh $loadbalancer systemctl daemon-reload
   . execute-command-remote.sh $loadbalancer systemctl enable nginx
@@ -14,4 +14,4 @@ else
   sudo systemctl enable nginx
   sudo systemctl restart nginx
 fi
-print_msg "Started nginx on $loadbalancer"
+prnt "Started nginx on $loadbalancer"

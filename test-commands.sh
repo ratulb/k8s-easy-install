@@ -2,7 +2,7 @@
 . utils.sh
 #Commands for testing the cluster setup
 
-print_msg "checking cluster nodes status"
+prnt "checking cluster nodes status"
 rm -f status-report
 kubectl get nodes | tee status-report
 status=$(cat status-report | awk '{if(NR>1)print}' | awk '{print $3}' | sort -u | tr "\n" " " | xargs)
@@ -18,11 +18,11 @@ done
 master_node=$(kubectl get nodes --no-headers | grep 'control-plane,master' | awk '{print $1}')
 
 kubectl taint nodes $master_node node-role.kubernetes.io/master-
-print_msg "Deploying a demo nginx pod"
+prnt "Deploying a demo nginx pod"
 
 kubectl apply -f https://raw.githubusercontent.com/ratulb/k8s-remote-install/main/nginx-deployment.yaml
 
-print_msg "Checking pod status"
+prnt "Checking pod status"
 
 rm status-report 2> /dev/null
 kubectl get pods | tee status-report

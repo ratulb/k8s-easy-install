@@ -35,4 +35,4 @@ else
   sudo -u $usr scp haproxy.draft $loadbalancer:/etc/haproxy/haproxy.cfg
 fi
 
-print_msg "Configured haproxy @$loadbalancer"
+prnt "Configured haproxy @$loadbalancer"

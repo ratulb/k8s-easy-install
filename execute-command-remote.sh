@@ -1,7 +1,9 @@
-#!/usr/bin/env bash 
+#!/usr/bin/env bash
 . utils.sh
-print_msg "Executing command on $remote_host"
 remote_host=$1
+if [ -z "$quiet" ]; then
+  prnt "Executing command on $remote_host"
+fi
 shift
 args="$@"
-sudo -u $usr ssh -o "StrictHostKeyChecking no" -o "ConnectTimeout=5" $remote_host $args
+sudo -u $usr ssh -o "StrictHostKeyChecking=no" -o "ConnectTimeout=3" $remote_host $args

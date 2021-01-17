@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 . utils.sh
-print_msg "Installing kubemaster load balancer on $loadbalancer"
+prnt "Installing kubemaster load balancer on $loadbalancer"
 if [ "$this_host_ip" = "$loadbalancer" ]; then
   sudo apt update
   sudo apt install -y haproxy

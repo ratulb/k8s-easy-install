@@ -34,4 +34,4 @@ else
   sudo -u $usr scp envoy/envoy.service $loadbalancer:/etc/systemd/system/
 fi
 
-print_msg "Configured envoy @$loadbalancer"
+prnt "Configured envoy @$loadbalancer"

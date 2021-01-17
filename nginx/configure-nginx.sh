@@ -28,4 +28,4 @@ else
   sudo -u $usr scp nginx.draft $loadbalancer:/etc/nginx/nginx.conf
 fi
 
-print_msg "Configured haproxy @$loadbalancer"
+prnt "Configured haproxy @$loadbalancer"

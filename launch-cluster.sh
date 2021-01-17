@@ -1,46 +1,45 @@
 #!/usr/bin/env bash
 . utils.sh
-
 if [[ -z "$master" ]] && [[ -z "$masters" ]]; then
   err "No master or masters provided"
   exit 1
 fi
-
 if [[ ! -z "$master" ]] && [[ ! -z "$masters" ]]; then
   err "Both master and masters are provided! Only one is allowed"
   exit 1
 fi
-
-print_msg "Master and worker configurations:"
-
+prnt "Master and worker configurations:"
 if [ ! -z "$loadbalancer" ]; then
-  print_msg "Load balancer: $loadbalancer"
+  prnt "Load balancer: $loadbalancer"
 fi
-
 if [ ! -z "$master" ]; then
-  print_msg "Master: $master"
+  prnt "Master: $master"
 fi
 if [ ! -z "$masters" ]; then
-  print_msg "Masters: $masters"
+  prnt "Masters: $masters"
 fi
 if [ ! -z "$workers" ]; then
-  print_msg "Workers: $workers"
+  prnt "Workers: $workers"
 fi
-
-print_msg "For remote hosts - make sure $this_host_ip's  SSH public key has been copied to them before proceeding!"
-
+prnt "For remote hosts - make sure $this_host_name($this_host_ip)'s  SSH public key has been copied to them before proceeding!"
 read -p "Proceed with installation(y)? " -n 1 -r
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-  print_msg "\nAborted cluster setup\n"
+  prnt "\nAborted cluster setup\n"
   return 1
 fi
-
 echo ""
-
 if [ ! -z "$master" ]; then
-  print_msg "Checking access to $master"
+  prnt "Checking access to $master"
   if ! can_access_ip $master; then
     err "Can not access $master"
+    exit 1
+  fi
+fi
+
+if [ ! -z "$loadbalancer" ]; then
+  prnt "Checking access to $loadbalancer"
+  if ! can_access_ip $loadbalancer; then
+    err "Can not access $loadbalancer"
     exit 1
   fi
 fi
@@ -52,6 +51,11 @@ if [ ! -z "$masters" ]; then
       exit 1
     fi
   done
+fi
+
+if [[ ! -z "$masters" ]] && [[ -z "$loadbalancer" ]]; then
+  err "Multi-master option is selected - but no loadbalancer."
+  exit 1
 fi
 
 if [ ! -z "$workers" ]; then
@@ -74,18 +78,18 @@ echo ""
 if [ -z "$masters" ]; then
   copy_kube_conf_from=$master
   if [ "$master" = "$this_host_name" ] || [ "$master" = "$this_host_ip" ]; then
-    print_msg "Installing kubeadm kubelet kubectl on master(this machine $master)"
+    prnt "Installing kubeadm kubelet kubectl on master(this machine $master)"
     . kube-remove.sh
     . install-kubeadm.sh
-    print_msg "Installing cri containerd cni on master(this computer $master)"
+    prnt "Installing cri containerd cni on master(this computer $master)"
     . install-cri-containerd-cni.sh
     . kubeadm-init.sh.tmp
     . configure-cgroup-driver.sh
   else
-    print_msg "Installing kubeadm kubelet kubectl on remote master($master)"
+    prnt "Installing kubeadm kubelet kubectl on remote master($master)"
     . execute-script-remote.sh $master kube-remove.sh
     . execute-script-remote.sh $master install-kubeadm.sh
-    print_msg "Installing cri containerd cni on remote master($master)"
+    prnt "Installing cri containerd cni on remote master($master)"
     . execute-script-remote.sh $master install-cri-containerd-cni.sh
     . execute-script-remote.sh $master kubeadm-init.sh.tmp
     . execute-script-remote.sh $master configure-cgroup-driver.sh
@@ -118,10 +122,10 @@ else
   copy_kube_conf_from=$(echo $masters | cut -d ' ' -f1)
   for _master in $masters; do
     if [ "$_master" = "$this_host_name" ] || [ "$_master" = "$this_host_ip" ]; then
-      print_msg "Installing kubeadm kubelet kubectl on master(this machine $_master)"
+      prnt "Installing kubeadm kubelet kubectl on master(this machine $_master)"
       . kube-remove.sh
       . install-kubeadm.sh
-      print_msg "Installing cri containerd cni on master(this computer $_master)"
+      prnt "Installing cri containerd cni on master(this computer $_master)"
       . install-cri-containerd-cni.sh
       if [ "$count" -eq 0 ]; then
         . kubeadm-init.sh.tmp
@@ -131,10 +135,10 @@ else
       fi
       . configure-cgroup-driver.sh
     else
-      print_msg "Installing kubeadm kubelet kubectl on remote master($_master)"
+      prnt "Installing kubeadm kubelet kubectl on remote master($_master)"
       . execute-script-remote.sh $_master kube-remove.sh
       . execute-script-remote.sh $_master install-kubeadm.sh
-      print_msg "Installing cri containerd cni on remote master($_master)"
+      prnt "Installing cri containerd cni on remote master($_master)"
       . execute-script-remote.sh $_master install-cri-containerd-cni.sh
       if [ "$count" -eq 0 ]; then
         . execute-script-remote.sh $_master kubeadm-init.sh.tmp
@@ -155,22 +159,22 @@ fi
 first_master=$(echo $masters | cut -d ' ' -f1)
 for worker in $workers; do
   if [ "$worker" = "$this_host_name" ] || [ "$worker" = "$this_host_ip" ]; then
-    print_msg "Installing kubeadm kubelet kubectl on worker $worker"
+    prnt "Installing kubeadm kubelet kubectl on worker $worker"
     . kube-remove.sh
     . install-kubeadm.sh
-    print_msg "Installing cri containerd cni on worker $worker"
+    prnt "Installing cri containerd cni on worker $worker"
     . install-cri-containerd-cni.sh
-    print_msg "$worker joining the cluster"
+    prnt "$worker joining the cluster"
     . worker-join-cluster.cmd
     . configure-cgroup-driver.sh
     . copy-kube-config.sh $copy_kube_conf_from
   else
-    print_msg "Installing kubeadm kubelet kubectl on worker $worker"
+    prnt "Installing kubeadm kubelet kubectl on worker $worker"
     . execute-script-remote.sh $worker kube-remove.sh
     . execute-script-remote.sh $worker install-kubeadm.sh
-    print_msg "Installing cri containerd cni on $worker"
+    prnt "Installing cri containerd cni on $worker"
     . execute-script-remote.sh $worker install-cri-containerd-cni.sh
-    print_msg "$worker joining the cluster"
+    prnt "$worker joining the cluster"
     . execute-script-remote.sh $worker worker-join-cluster.cmd
     . execute-script-remote.sh $worker configure-cgroup-driver.sh
   fi
@@ -178,6 +182,15 @@ done
 
 . init-self.sh
 #Install cni-pluggin
-print_msg "Installing weave cni pluggin"
+prnt "Installing weave cni pluggin"
 . install-cni-pluggin.sh
 . test-commands.sh
+
+if [ -z "$debug" ]; then
+  rm -f kubeadm-init.sh.tmp
+  rm -f envoy.draft
+  rm -f worker-join-cluster.cmd
+  rm -f master-join-cluster.cmd
+  rm -f kubeadm-init.log
+  rm -f status-report
+fi

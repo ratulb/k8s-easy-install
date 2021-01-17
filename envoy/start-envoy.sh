@@ -3,7 +3,7 @@
 
 . nginx/stop-nginx.sh
 . haproxy/stop-haproxy.sh
-print_msg "Starting envoy on $loadbalancer"
+prnt "Starting envoy on $loadbalancer"
 if [ "$this_host_ip" != "$loadbalancer" ]; then
   . execute-command-remote.sh $loadbalancer systemctl daemon-reload
   . execute-command-remote.sh $loadbalancer systemctl enable envoy
@@ -13,4 +13,4 @@ else
   sudo systemctl enable envoy
   sudo systemctl restart envoy
 fi
-print_msg "Started envoy on $loadbalancer"
+prnt "Started envoy on $loadbalancer"
