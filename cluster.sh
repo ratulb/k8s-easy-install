@@ -20,6 +20,9 @@ select option in "${!setupActions[@]}"; do
     err "Invalid selection!"
   else
     case "${setupActions[$option]}" in
+      system-pod-status)
+        . system-pod-status.sh
+        ;;
 
       console)
         ./console.sh
@@ -29,8 +32,8 @@ select option in "${!setupActions[@]}"; do
         single_master_setup_options=("Master ip" "Back" "Worker ips(s)" "Launch")
         select smc_option in "${single_master_setup_options[@]}"; do
           #if [[ "$smc_option" = "Cancel" ]]; then
-           # PS3=$'\e[01;32mSelection: \e[0m'
-            #break
+          # PS3=$'\e[01;32mSelection: \e[0m'
+          #break
           #fi
           if ! [[ "$REPLY" =~ $re ]] || [ "$REPLY" -gt 4 -o "$REPLY" -lt 1 ]; then
             err "Invalid selection"
