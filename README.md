@@ -26,7 +26,7 @@ And then run the following script:
 
 And the cluster should be up and running with a nginx deployment. 
 
-These steps have been verified on Ubuntu 16.04/18.04/20.04.
+These steps have been verified on debian buster and Ubuntu 16.04/18.04/20.04.
 
 Work in progress for multi-master cluster with seamless back and forth switch between embedded etcd and external etcd cluster.
 
