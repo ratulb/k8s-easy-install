@@ -185,12 +185,4 @@ done
 prnt "Installing weave cni pluggin"
 . install-cni-pluggin.sh
 . test-commands.sh
-
-if [ -z "$debug" ]; then
-  rm -f kubeadm-init.sh.tmp
-  rm -f envoy.draft
-  rm -f worker-join-cluster.cmd
-  rm -f master-join-cluster.cmd
-  rm -f kubeadm-init.log
-  rm -f status-report
-fi
+. clean-trash.sh

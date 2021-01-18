@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 . utils.sh
 clear
-prnt "Setup single master/multi-master k8s cluster on containerd"
+prnt "k8s cluster(single/multi master) on containerd. Load balance kube api servers with haproxy/nginx/envoy."
 declare -A setupActions
 setupActions+=(['Quit']='quit')
 setupActions+=(['Single master cluster']='single-master-cluster')
