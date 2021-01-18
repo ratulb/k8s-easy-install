@@ -31,10 +31,6 @@ select option in "${!setupActions[@]}"; do
         PS3=$'\e[01;32mSingle master setup: \e[0m'
         single_master_setup_options=("Master ip" "Back" "Worker ips(s)" "Launch")
         select smc_option in "${single_master_setup_options[@]}"; do
-          #if [[ "$smc_option" = "Cancel" ]]; then
-          # PS3=$'\e[01;32mSelection: \e[0m'
-          #break
-          #fi
           if ! [[ "$REPLY" =~ $re ]] || [ "$REPLY" -gt 4 -o "$REPLY" -lt 1 ]; then
             err "Invalid selection"
           else
@@ -53,7 +49,6 @@ select option in "${!setupActions[@]}"; do
                   fi
                   [ "$masterIp" = "p" ] && masterIp=$(hostname -i) && break
                 done
-                #if ! [[ -z "$masterIp" ]] && [ "$masterIp" != "q" ]; then
                 if ! is_address_local $masterIp; then
                   prnt "Checking access to $masterIp"
                   rm -f /tmp/master-ip-single-master-cluster.txt
@@ -69,7 +64,6 @@ select option in "${!setupActions[@]}"; do
                   echo "master=$masterIp" >>/tmp/master-ip-single-master-cluster.txt
                   echo "Saved master ip"
                 fi
-                #fi
                 ;;
               'Back')
                 rm -f /tmp/master-ip-single-master-cluster.txt
