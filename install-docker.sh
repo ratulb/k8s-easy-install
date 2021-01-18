@@ -3,6 +3,7 @@ sudo apt update
 # (Install Docker CE)
 ## Set up the repository:
 ### Install packages to allow apt to use a repository over HTTPS
+
 sudo apt update && sudo apt install -y \
   apt-transport-https ca-certificates curl software-properties-common gnupg2
 
@@ -36,6 +37,7 @@ cat <<EOF | sudo tee /etc/docker/daemon.json
   "storage-driver": "overlay2"
 }
 EOF
+sudo usermod -aG docker ${USER}
 
 #Restart Docker
 sudo systemctl daemon-reload
