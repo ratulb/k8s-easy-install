@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 . utils.sh
 clear
-prnt "k8s cluster(single/multi master) on containerd. Load balance kube api servers with haproxy/nginx/envoy."
+echo ""
+prnt "k8s cluster(single/multi master) on containerd"
 declare -A setupActions
 setupActions+=(['Quit']='quit')
 setupActions+=(['Single master cluster']='single-master-cluster')
@@ -12,6 +13,7 @@ setupActions+=(['Kubelet status']='kubelet-status')
 setupActions+=(['System pod status']='system-pod-status')
 setupActions+=(['Load balancer status']='lb-status')
 setupActions+=(['Refresh view']='refresh-view')
+echo ""
 re="^[0-9]+$"
 PS3=$'\e[01;32mSelection: \e[0m'
 select option in "${!setupActions[@]}"; do

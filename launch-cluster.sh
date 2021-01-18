@@ -8,7 +8,8 @@ if [[ ! -z "$master" ]] && [[ ! -z "$masters" ]]; then
   err "Both master and masters are provided! Only one is allowed"
   exit 1
 fi
-prnt "Master and worker configurations:"
+echo ""
+prnt "In-progress cluster configurations:"
 if [ ! -z "$loadbalancer" ]; then
   prnt "Load balancer: $loadbalancer"
 fi
