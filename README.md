@@ -18,8 +18,6 @@ Follow the menu driven options to create a single master or multi-master cluster
 
 These steps have been verified on debian buster and Ubuntu 16.04/18.04/20.04.
 
-Work in progress for multi-master cluster with seamless back and forth switch between embedded etcd and external etcd cluster.
-
-Cross reference: http://rbsomeg.blogspot.com/2020/11/setting-up-kubernetes-cluster-ubuntu.html
+Cross reference: http://rbsomeg.blogspot.com/2021/01/multi-master-kubernetes-on-containerd.html
 
 
