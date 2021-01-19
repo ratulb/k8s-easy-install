@@ -95,6 +95,7 @@ if [ -z "$masters" ]; then
     . execute-script-remote.sh $master kubeadm-init.sh.tmp
     . execute-script-remote.sh $master configure-cgroup-driver.sh
     . copy-init-log.sh $master
+    . copy-config-toml.sh $master
   fi
   . prepare-cluster-join.sh
 else
@@ -149,6 +150,7 @@ else
         . execute-script-remote.sh $_master master-join-cluster.cmd
       fi
       . execute-script-remote.sh $_master configure-cgroup-driver.sh
+      . copy-config-toml.sh $_master
     fi
     if [ "$count" -eq 0 ]; then
       . prepare-cluster-join.sh
@@ -178,6 +180,7 @@ for worker in $workers; do
     prnt "$worker joining the cluster"
     . execute-script-remote.sh $worker worker-join-cluster.cmd
     . execute-script-remote.sh $worker configure-cgroup-driver.sh
+    . copy-config-toml.sh $worker
   fi
 done
 
