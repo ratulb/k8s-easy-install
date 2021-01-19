@@ -472,7 +472,7 @@ select option in "${!setupActions[@]}"; do
         break
         ;;
       *)
-        err "$option - The option not yet programmed for"
+        err "$option - This option has been disabled!"
         ;;
     esac
   fi
