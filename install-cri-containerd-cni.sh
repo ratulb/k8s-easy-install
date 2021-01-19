@@ -29,9 +29,6 @@ sudo modprobe overlay
 sudo modprobe br_netfilter
 
 sudo echo "KUBELET_EXTRA_ARGS=--cgroup-driver=systemd" > /etc/default/kubelet
-
-sudo mkdir -p  /etc/systemd/system/kubelet.service.d/
-
 sudo mkdir -p /etc/containerd
 sudo cp config.toml /etc/containerd/
 
