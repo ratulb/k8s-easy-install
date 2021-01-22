@@ -243,22 +243,13 @@ validate_multi-master-configuration() {
     done
   fi
 }
-configure_single_master_setup() {
-  local _master_=$1
-  local _workers_=$2
-  if [ -z "$_master_" ]; then
-    err "Master is empty"
-    return 1
-  else
-    sed -i "s/master=.*/master=$_master_/g" setup.conf
-  fi
-  if [ ! -z "$_workers_" ]; then
-    sed -i "s/workers=.*/workers=$_workers_/g" setup.conf
-  else
-    sed -i "s/workers=.*/workers=/g" setup.conf
-  fi
+reset_setup_configuration() {
+  sed -i "s/workers=.*/workers=/g" setup.conf
   sed -i "s/masters=.*/masters=/g" setup.conf
   sed -i "s/loadbalancer=.*/loadbalancer=/g" setup.conf
+  sed -i "s/lb_port=.*/lb_port=/g" setup.conf
+  sed -i "s/lb_type=.*/lb_type=/g" setup.conf
+  sed -i "s/pod_network_cidr=.*/pod_network_cidr=/g" setup.conf
 }
 
 configure_multi_master_setup() {

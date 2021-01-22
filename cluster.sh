@@ -32,9 +32,9 @@ select option in "${!setupActions[@]}"; do
       cluster-setup)
         echo ""
         PS3=$'\e[01;32mMulti-master setup: \e[0m'
-        multi_master_options=('Loadbalancer' 'Back' 'Launch' 'Master nodes' 'Worker nodes')
+        multi_master_options=('Loadbalancer' 'Back' 'Launch' 'Master nodes' 'Worker nodes' 'Reset configuration')
         select multi_master_option in "${multi_master_options[@]}"; do
-          if ! [[ "$REPLY" =~ $re ]] || [ "$REPLY" -gt 5 -o "$REPLY" -lt 1 ]; then
+          if ! [[ "$REPLY" =~ $re ]] || [ "$REPLY" -gt 6 -o "$REPLY" -lt 1 ]; then
             err "Invalid selection!"
           else
             case "$multi_master_option" in
@@ -242,6 +242,19 @@ select option in "${!setupActions[@]}"; do
                 rm -f /tmp/worker-ips-cluster-setup.txt
                 echo ""
                 break
+                ;;
+              'Reset configuration')
+                . confirm-action.sh "Reset cluster configurations" "Cancelled reset"
+                if [ "$?" -eq 0 ]; then
+                  rm -f /tmp/selected_lb_type.txt
+                  rm -f /tmp/lb_addr_and_port.txt
+                  rm -f /tmp/master-ips-cluster-setup.txt
+                  rm -f /tmp/worker-ips-cluster-setup.txt
+                  reset_setup_configuration
+                  read_setup
+                  echo ""
+                  prnt "Configurations have been reset"
+                fi
                 ;;
 
               'Launch')
