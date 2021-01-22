@@ -7,12 +7,12 @@ lb_port=#lb_port#
 process_name=$(sudo ss -lptn 'sport = :6443' | cut -d'"' -f2)
 process_id=$(sudo ss -lptn 'sport = :6443' | grep pid | cut -d'=' -f2 | cut -d',' -f1)
 sudo systemctl stop $process_name &>/dev/null
-#sudo systemctl disable $process_name &>/dev/null
-#sudo systemctl daemon-reload
+sudo systemctl disable $process_name &>/dev/null
+sudo systemctl daemon-reload
 sudo kill -9 $process_id &>/dev/null
 
 sudo systemctl restart kubelet
-if [ -z "$loadbalacer" ]; then
+if [ -z "$loadbalancer" ]; then
   sudo kubeadm init --token-ttl 0 --cri-socket /run/containerd/containerd.sock | sudo tee kubeadm-init.log
 else
   if [ -z "$pod_network_cidr" ]; then

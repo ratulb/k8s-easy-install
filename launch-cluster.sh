@@ -11,12 +11,13 @@ if [[ "$master_count" -gt 1 ]] && ([[ -z $loadbalancer ]] || [[ -z "$lb_type" ]]
   return 1
 fi
 
-if ([[ ! -z "$loadbalancer" ]] && ([[ -z "$lb_type" ]] || [[ -z "$lb_port" ]])) || ([[ ! -z "$lb_type" ]] && ([[  -z "$loadbalancer" ]] || [[ -z "$lb_port" ]])) || ([[ ! -z "$lb_port" ]] && ([[ -z "$lb_type" ]] || [[ -z "$loadbalancer" ]])); then
+if ([[ ! -z "$loadbalancer" ]] && ([[ -z "$lb_type" ]] || [[ -z "$lb_port" ]])) || ([[ ! -z "$lb_type" ]] && ([[ -z "$loadbalancer" ]] || [[ -z "$lb_port" ]])) || ([[ ! -z "$lb_port" ]] && ([[ -z "$lb_type" ]] || [[ -z "$loadbalancer" ]])); then
   err "Loadbalancer configuration is not complete"
   return 1
 fi
 
 if [ ! -z "$loadbalancer" ]; then
+  prnt "Checking connectivity loadbalancer..."
   if ! can_access_address $loadbalancer; then
     err "Loadbalancer is provided but can not access loadbalancer at $loadbalancer"
     return 1
@@ -24,6 +25,7 @@ if [ ! -z "$loadbalancer" ]; then
 fi
 
 for _mstr in $masters; do
+  prnt "Checking connectivity master node(s)..."
   if ! can_access_address $_mstr; then
     err "Can not access master address $_mstr"
     return 1
@@ -31,6 +33,7 @@ for _mstr in $masters; do
 done
 
 if [ ! -z "$workers" ]; then
+  prnt "Checking connectivity worker node(s)..."
   for wokr in $workers; do
     if ! can_access_address $wokr; then
       err "Can not access worker $wokr"
@@ -55,7 +58,7 @@ prnt "For remote hosts - make sure $this_host_name($this_host_ip)'s  SSH public 
 re proceeding!"
 read -p "Proceed with installation(y)? " -n 1 -r
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-  prnt "\nAborted cluster setup\n"
+  err "\nAborted cluster setup\n"
   return 1
 fi
 echo ""
@@ -101,6 +104,7 @@ for _master in $masters; do
     if [ "$count" -eq 0 ]; then
       . kubeadm-init.sh.tmp
       . prepare-cluster-join.sh
+      prnt "Installing weave cni pluggin"
       . install-cni-pluggin.sh
     else
       . master-join-cluster.cmd
@@ -116,19 +120,23 @@ for _master in $masters; do
       remote_script $_master kubeadm-init.sh.tmp
       . copy-init-log.sh $_master
       . prepare-cluster-join.sh
-      . copy-kube-config.sh 'from' $_master
+      prnt "Installing weave cni pluggin"
       remote_script $_master install-cni-pluggin.sh
     else
       remote_script $_master master-join-cluster.cmd
+    fi
+    if [ "$count" -eq 0 ]; then
+      . copy-kube-config.sh 'from' $_master
+    else
       . copy-kube-config.sh 'to' $_master
     fi
-    remote_script $_master configure-cgroup-driver.sh
     . copy-config-toml.sh $_master
+    remote_script $_master configure-cgroup-driver.sh
   fi
   ((count++))
 done
 
-#worker installtion
+#workers' installtion
 for worker in $workers; do
   if [ "$worker" = "$this_host_name" ] || [ "$worker" = "$this_host_ip" ]; then
     prnt "Installing kubeadm kubelet kubectl on worker $worker"
@@ -147,14 +155,11 @@ for worker in $workers; do
     remote_script $worker install-cri-containerd-cni.sh
     prnt "$worker joining the cluster"
     remote_script $worker worker-join-cluster.cmd
-    remote_script $worker configure-cgroup-driver.sh
     . copy-config-toml.sh $worker
+    remote_script $worker configure-cgroup-driver.sh
   fi
 done
 
 . init-self.sh
-#Install cni-pluggin
-prnt "Installing weave cni pluggin"
-. install-cni-pluggin.sh
 . test-commands.sh
 . clean-trash.sh

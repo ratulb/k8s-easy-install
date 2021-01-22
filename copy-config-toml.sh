@@ -1,4 +1,4 @@
 #!/usr/bin/env bash 
-sudo -u $usr scp config.toml $1:~/
+remote_copy  config.toml $1:~/
 
 

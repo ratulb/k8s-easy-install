@@ -112,7 +112,7 @@ remote_script() {
 remote_cmd() {
   remote_host=$1
   if [ -z "$quiet" ]; then
-    :#prnt "Executing command on $remote_host"
+    : #prnt "Executing command on $remote_host"
   fi
   shift
   args="$@"
@@ -121,6 +121,12 @@ remote_cmd() {
 
 remote_copy() {
   sudo -u $usr scp -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $1 $2
+}
+remote_call() {
+  prnt "Executing a return on $1"
+  sudo -u $usr scp -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $2 $1:~/
+  sudo -u $usr ssh -o "StrictHostKeyChecking no" -o "ConnectTimeout=5" $1 ". $2"
+  #sudo -u $usr ssh -q -o "LogLevel=ERROR" -o "StrictHostKeyChecking no" -o "ConnectTimeout=5" $1 < $2 &> /dev/null
 }
 
 lb_address_valid() {
