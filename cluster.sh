@@ -112,7 +112,7 @@ select option in "${!setupActions[@]}"; do
                   done
                 fi
                 echo ""
-                PS3=$'\e[01;32mMulti master cluster: \e[0m'
+                PS3=$'\e[01;32mCluster setup: \e[0m'
                 ;;
 
               'Master nodes')
@@ -172,7 +172,7 @@ select option in "${!setupActions[@]}"; do
                   fi
                 fi
                 echo ""
-                PS3=$'\e[01;32mMulti master cluster: \e[0m'
+                PS3=$'\e[01;32mCluster setup: \e[0m'
                 ;;
 
               'Worker nodes')
@@ -232,7 +232,7 @@ select option in "${!setupActions[@]}"; do
                 fi
 
                 echo ""
-                PS3=$'\e[01;32mMulti master cluster: \e[0m'
+                PS3=$'\e[01;32mCluster setup: \e[0m'
                 ;;
               'Back')
                 echo "Exited multi-master setup"
