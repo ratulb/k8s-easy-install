@@ -2,10 +2,10 @@
 . utils.sh
 
 prnt "Stopping haproxy on $loadbalancer"
-if [ "$this_host_ip" != "$loadbalancer" ]; then
-  . execute-command-remote.sh $loadbalancer systemctl stop haproxy &>/dev/null
-  . execute-command-remote.sh $loadbalancer systemctl disable haproxy &>/dev/null
-  . execute-command-remote.sh $loadbalancer systemctl daemon-reload
+if [[ "$this_host_ip" != "$loadbalancer" ]] && [[ "$this_host_name" != "$loadbalancer" ]]; then
+  remote_cmd $loadbalancer systemctl stop haproxy &>/dev/null
+  remote_cmd $loadbalancer systemctl disable haproxy &>/dev/null
+  remote_cmd $loadbalancer systemctl daemon-reload
 else
   sudo systemctl stop haproxy &>/dev/null
   sudo systemctl disable haproxy &>/dev/null

@@ -32,7 +32,7 @@ cat /tmp/haproxy.config.snippet >> haproxy.draft
 if [[ "$this_host_ip" = "$loadbalancer" ]] || [[ "$this_host_name" = "$loadbalancer" ]]; then
   mv haproxy.draft /etc/haproxy/haproxy.cfg
 else
-  sudo -u $usr scp haproxy.draft $loadbalancer:/etc/haproxy/haproxy.cfg
+  remote_copy haproxy.draft $loadbalancer:/etc/haproxy/haproxy.cfg
 fi
 
 prnt "Configured haproxy @$loadbalancer"

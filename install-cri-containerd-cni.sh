@@ -42,7 +42,7 @@ sudo systemctl restart kubelet
 sleep 3
 pod_ids=$(crictl pods | awk '{if(NR>1)print}' | awk '{print $1}' | tr "\n" " ")
 if [ ! -z "$pod_ids" ]; then
-  crictl stopp $pod_ids && crictl rmp $pod_ids
+  crictl stopp $pod_ids && crictl rmp $pod_ids 2>/dev/null
 fi
 
 echo -e "\e[1;32mInstalled cri-containerd-cni on $(hostname)($(hostname -i)).\e[0m"

@@ -25,7 +25,7 @@ cat /tmp/nginx.config.snippet >> nginx.draft
 if [[ "$this_host_ip" = "$loadbalancer" ]] || [[ "$this_host_name" = "$loadbalancer" ]]; then
   mv nginx.draft /etc/nginx/nginx.conf
 else
-  sudo -u $usr scp nginx.draft $loadbalancer:/etc/nginx/nginx.conf
+  remote_copy nginx.draft $loadbalancer:/etc/nginx/nginx.conf
 fi
 
 prnt "Configured haproxy @$loadbalancer"

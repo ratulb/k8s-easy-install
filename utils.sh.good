@@ -66,7 +66,7 @@ can_access_ip() {
   if is_address_local $1; then
     return 0
   else
-    remote_cmd $1 ls -la &>/dev/null
+    . execute-command-remote.sh $1 ls -la &>/dev/null
   fi
 }
 
@@ -105,14 +105,14 @@ can_access_address() {
 }
 
 remote_script() {
-  #prnt "Executing on $1"
+  prnt "Executing on $1"
   sudo -u $usr ssh -q -o StrictHostKeyChecking=no -o ConnectTimeout=3 $1 <$2
 }
 
 remote_cmd() {
   remote_host=$1
   if [ -z "$quiet" ]; then
-    :#prnt "Executing command on $remote_host"
+    prnt "Executing command on $remote_host"
   fi
   shift
   args="$@"
@@ -158,7 +158,7 @@ validate_single_master_configuration() {
   if is_address_local $_mstr_ip; then
     m_ip=$(hostname -i)
   else
-    m_ip=$(quiet=yes remote_cmd $_mstr_ip hostname -i)
+    m_ip=$(quiet=yes . execute-command-remote.sh $_mstr_ip hostname -i)
   fi
 
   debug "_mstr_ip $_mstr_ip, _workrs_ $_workrs_ and m_ip $m_ip"
@@ -167,7 +167,7 @@ validate_single_master_configuration() {
       if is_address_local $_w; then
         worker_ips+="$(hostname -i) "
       else
-        worker_ips+="$(quiet=yes remote_cmd $_w hostname -i) "
+        worker_ips+="$(quiet=yes . execute-command-remote.sh $_w hostname -i) "
       fi
     done
     worker_ips=$(echo $worker_ips | xargs)
@@ -192,7 +192,7 @@ validate_multi-master-configuration() {
       if is_address_local $_w; then
         worker_ips+="$(hostname -i) "
       else
-        worker_ips+="$(quiet=yes remote_cmd $_w hostname -i) "
+        worker_ips+="$(quiet=yes . execute-command-remote.sh $_w hostname -i) "
       fi
     done
   fi
@@ -203,7 +203,7 @@ validate_multi-master-configuration() {
     if is_address_local $_m; then
       master_ips+="$(hostname -i) "
     else
-      master_ips+="$(quiet=yes remote_cmd $_m hostname -i) "
+      master_ips+="$(quiet=yes . execute-command-remote.sh $_m hostname -i) "
     fi
   done
   master_ips=$(echo $master_ips | xargs)
@@ -212,7 +212,7 @@ validate_multi-master-configuration() {
     if is_address_local $_lb_addr; then
       lb_ip=$(hostname -i)
     else
-      lb_ip=$(quiet=yes remote_cmd $_lb_addr hostname -i)
+      lb_ip=$(quiet=yes . execute-command-remote.sh $_lb_addr hostname -i)
     fi
   fi
 

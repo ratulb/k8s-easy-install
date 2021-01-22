@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 . utils.sh
 prnt "Installing kube-apiserver nginx load balancer on $loadbalancer"
-if [ "$this_host_ip" = "$loadbalancer" ]; then
+if [[ "$this_host_ip" = "$loadbalancer" ]] || [[ "$this_host_name" = "$loadbalancer" ]]; then
   sudo command -v nginx &>/dev/null
   if [ "$?" -ne 0 ]; then
-    sudo apt purge nginx-full nginx-common
+    sudo apt purge -y nginx-full nginx-common
     sudo apt autoremove -y
     sudo apt update
     sudo apt install -y nginx
@@ -14,13 +14,13 @@ if [ "$this_host_ip" = "$loadbalancer" ]; then
     prnt "nginx is already installed"
   fi
 else
-  . execute-command-remote.sh $loadbalancer command -v nginx &>/dev/null
+  remote_cmd $loadbalancer command -v nginx &>/dev/null
   if [ "$?" -ne 0 ]; then
-    . execute-command-remote.sh $loadbalancer apt purge nginx-full nginx-common
-    . execute-command-remote.sh $loadbalancer apt autoremove -y
-    . execute-command-remote.sh $loadbalancer apt update
-    . execute-command-remote.sh $loadbalancer apt install -y nginx
-    . execute-command-remote.sh $loadbalancer apt autoremove -y
+    remote_cmd $loadbalancer apt purge -y nginx-full nginx-common
+    remote_cmd $loadbalancer apt autoremove -y
+    remote_cmd $loadbalancer apt update
+    remote_cmd $loadbalancer apt install -y nginx
+    remote_cmd $loadbalancer apt autoremove -y
     prnt "nginx has been installed on $loadbalancer"
   else
     prnt "nginx is already installed"
