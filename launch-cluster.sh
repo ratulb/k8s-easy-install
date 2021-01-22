@@ -17,7 +17,7 @@ if ([[ ! -z "$loadbalancer" ]] && ([[ -z "$lb_type" ]] || [[ -z "$lb_port" ]])) 
 fi
 
 if [ ! -z "$loadbalancer" ]; then
-  prnt "Checking connectivity loadbalancer..."
+  prnt "Checking connectivity to loadbalancer..."
   if ! can_access_address $loadbalancer; then
     err "Loadbalancer is provided but can not access loadbalancer at $loadbalancer"
     return 1
@@ -25,7 +25,7 @@ if [ ! -z "$loadbalancer" ]; then
 fi
 
 for _mstr in $masters; do
-  prnt "Checking connectivity master node(s)..."
+  prnt "Checking connectivity to master node(s)..."
   if ! can_access_address $_mstr; then
     err "Can not access master address $_mstr"
     return 1
@@ -33,7 +33,7 @@ for _mstr in $masters; do
 done
 
 if [ ! -z "$workers" ]; then
-  prnt "Checking connectivity worker node(s)..."
+  prnt "Checking connectivity to worker node(s)..."
   for wokr in $workers; do
     if ! can_access_address $wokr; then
       err "Can not access worker $wokr"
