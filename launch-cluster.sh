@@ -4,18 +4,15 @@ if [[ -z "$masters" ]]; then
   err "No master nodes provided"
   return 1
 fi
-
 master_count=$(echo $masters | wc -w)
 if [[ "$master_count" -gt 1 ]] && ([[ -z $loadbalancer ]] || [[ -z "$lb_type" ]] || [[ -z "$lb_port" ]]); then
   err "For multi-master setup loadbalancer is needed - but configuration not correct"
   return 1
 fi
-
 if ([[ ! -z "$loadbalancer" ]] && ([[ -z "$lb_type" ]] || [[ -z "$lb_port" ]])) || ([[ ! -z "$lb_type" ]] && ([[ -z "$loadbalancer" ]] || [[ -z "$lb_port" ]])) || ([[ ! -z "$lb_port" ]] && ([[ -z "$lb_type" ]] || [[ -z "$loadbalancer" ]])); then
   err "Loadbalancer configuration is not complete"
   return 1
 fi
-
 if [ ! -z "$loadbalancer" ]; then
   prnt "Checking connectivity to loadbalancer..."
   if ! can_access_address $loadbalancer; then
@@ -23,7 +20,6 @@ if [ ! -z "$loadbalancer" ]; then
     return 1
   fi
 fi
-
 prnt "Checking connectivity to master node(s)..."
 for _mstr in $masters; do
   if ! can_access_address $_mstr; then
@@ -31,7 +27,6 @@ for _mstr in $masters; do
     return 1
   fi
 done
-
 if [ ! -z "$workers" ]; then
   prnt "Checking connectivity to worker node(s)..."
   for wokr in $workers; do
@@ -41,7 +36,6 @@ if [ ! -z "$workers" ]; then
     fi
   done
 fi
-
 echo ""
 prnt "In-progress cluster configurations:"
 if [ ! -z "$loadbalancer" ]; then
@@ -57,7 +51,7 @@ fi
 prnt "For remote hosts - make sure $this_host_name($this_host_ip)'s  SSH public key has been copied to them befo
 re proceeding!"
 read -p "Proceed with installation(y)? " -n 1 -r
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+if [[ ! "$REPLY" =~ ^[Yy]$ ]]; then
   err "\nAborted cluster setup\n"
   return 1
 fi

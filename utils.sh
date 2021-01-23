@@ -100,7 +100,8 @@ can_access_address() {
   if is_address_local $_addr; then
     return 0
   else
-    remote_cmd $1 ls -la &>/dev/null
+    remote_cmd $_addr ls -la &>/dev/null
+    ([ "$?" -eq 0 ] && return 0) || return 1
   fi
 }
 
