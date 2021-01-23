@@ -24,8 +24,8 @@ if [ ! -z "$loadbalancer" ]; then
   fi
 fi
 
+prnt "Checking connectivity to master node(s)..."
 for _mstr in $masters; do
-  prnt "Checking connectivity to master node(s)..."
   if ! can_access_address $_mstr; then
     err "Can not access master address $_mstr"
     return 1
@@ -104,8 +104,6 @@ for _master in $masters; do
     if [ "$count" -eq 0 ]; then
       . kubeadm-init.sh.tmp
       . prepare-cluster-join.sh
-      prnt "Installing weave cni pluggin"
-      . install-cni-pluggin.sh
     else
       . master-join-cluster.cmd
     fi
@@ -121,7 +119,6 @@ for _master in $masters; do
       . copy-init-log.sh $_master
       . prepare-cluster-join.sh
       prnt "Installing weave cni pluggin"
-      remote_script $_master install-cni-pluggin.sh
     else
       remote_script $_master master-join-cluster.cmd
     fi
@@ -160,6 +157,7 @@ for worker in $workers; do
   fi
 done
 
+. install-cni-pluggin.sh
 . init-self.sh
 . test-commands.sh
 . clean-trash.sh

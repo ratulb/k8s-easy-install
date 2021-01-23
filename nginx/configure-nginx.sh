@@ -28,4 +28,4 @@ else
   remote_copy nginx.draft $loadbalancer:/etc/nginx/nginx.conf
 fi
 
-prnt "Configured haproxy @$loadbalancer"
+prnt "Configured nginx on $loadbalancer"

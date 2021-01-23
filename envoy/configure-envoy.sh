@@ -34,4 +34,4 @@ else
   remote_copy envoy/envoy.service $loadbalancer:/etc/systemd/system/
 fi
 
-prnt "Configured envoy @$loadbalancer"
+prnt "Configured envoy on $loadbalancer"

@@ -35,4 +35,4 @@ else
   remote_copy haproxy.draft $loadbalancer:/etc/haproxy/haproxy.cfg
 fi
 
-prnt "Configured haproxy @$loadbalancer"
+prnt "Configured haproxy on $loadbalancer"

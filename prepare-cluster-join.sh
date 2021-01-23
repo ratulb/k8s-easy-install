@@ -24,7 +24,7 @@ if [ ! -z "$loadbalancer" ]; then
     if [[ $cnt -eq 0 ]] || [[ "$me" = "$this_host_ip" ]] || [[ "$me" = "$this_host_name" ]]; then
       :
     else
-      copy_remote master-join-cluster.cmd $me:~/
+      remote_copy master-join-cluster.cmd $me:~/
     fi
     ((cnt++))
   done

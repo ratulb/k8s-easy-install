@@ -324,6 +324,7 @@ select option in "${!setupActions[@]}"; do
                       read_setup
                       . confirm-action.sh "Proceed" "Cancelled cluster setup"
                       if [ "$?" -eq 0 ]; then
+		        echo ""
                         read_setup
                         . launch-cluster.sh
                       fi
