@@ -150,7 +150,6 @@ for worker in $workers; do
     remote_script $worker configure-cgroup-driver.sh
   fi
 done
-
 . install-cni-pluggin.sh
 . init-self.sh
 . test-commands.sh
