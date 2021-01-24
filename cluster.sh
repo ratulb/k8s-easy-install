@@ -2,7 +2,7 @@
 . utils.sh
 clear
 echo ""
-prnt "kubernetetes containerd cluster setup"
+prnt "kubernetes cluster setup"
 declare -A setupActions
 setupActions+=(['Quit']='quit')
 setupActions+=(['Cluster setup']='cluster-setup')
