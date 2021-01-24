@@ -124,9 +124,9 @@ remote_copy() {
   sudo -u $usr scp -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $1 $2
 }
 remote_call() {
-  prnt "Executing a return on $1"
-  sudo -u $usr scp -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $2 $1:~/
-  sudo -u $usr ssh -o "StrictHostKeyChecking no" -o "ConnectTimeout=5" $1 ". $2"
+  debug "Executing a return on $1"
+  remote_copy $2 $1:~/
+  remote_cmd $1 ". $2"
   #sudo -u $usr ssh -q -o "LogLevel=ERROR" -o "StrictHostKeyChecking no" -o "ConnectTimeout=5" $1 < $2 &> /dev/null
 }
 
