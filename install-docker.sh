@@ -8,10 +8,10 @@ sudo apt update && sudo apt install -y \
   apt-transport-https ca-certificates curl software-properties-common gnupg2
 
 sudo apt-get remove -y docker docker-engine docker.io containerd runc
-home_url=$(sudo cat /etc/*release | grep HOME_URL | cut -d'"' -f2)
+home_url=$(cat /etc/*release | grep HOME_URL | cut -d'"' -f2)
 if [[ "$home_url" = "https://www.ubuntu.com/" ]] || [[ "$home_url" = "http://www.ubuntu.com/" ]]; then
   curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-  version_id=$(sudo cat /etc/*release | grep VERSION_ID | cut -d'"' -f2)
+  version_id=$(cat /etc/*release | grep VERSION_ID | cut -d'"' -f2)
   if [[ "$version_id" =~ "20*" ]]; then
     sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu eoan stable"
   else
