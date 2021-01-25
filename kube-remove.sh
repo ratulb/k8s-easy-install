@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-echo -e "\e[1;32mRemoving kubernetes on $(hostname)($(hostname -i))\e[0m"
+echo -e "\e[92mRemoving kubernetes on $(hostname)($(hostname -i))\e[0m"
 
 sudo rm -f /etc/kubernetes/manifests/* 
 if command -v crictl &>/dev/null; then
@@ -22,4 +22,4 @@ sudo rm -rf /opt/cni/bin
 sudo ps -ef | grep kube-apiserver | grep -v grep | awk '{print $2}' | xargs kill -9 &>/dev/null
 sudo systemctl daemon-reload
 
-echo -e "\e[1;32mRemoved kubernetes on $(hostname)($(hostname -i))\e[0m"
+echo -e "\e[92mRemoved kubernetes on $(hostname)($(hostname -i))\e[0m"

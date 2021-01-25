@@ -14,7 +14,7 @@ setupActions+=(['Load balancer status']='lb-status')
 setupActions+=(['Refresh view']='refresh-view')
 echo ""
 re="^[0-9]+$"
-PS3=$'\e[01;32mSelection: \e[0m'
+PS3=$'\e[92mSelection: \e[0m'
 select option in "${!setupActions[@]}"; do
 
   if ! [[ "$REPLY" =~ $re ]] || [ "$REPLY" -gt 8 -o "$REPLY" -lt 1 ]; then
@@ -31,7 +31,7 @@ select option in "${!setupActions[@]}"; do
 
       cluster-setup)
         echo ""
-        PS3=$'\e[01;32mMulti-master setup: \e[0m'
+        PS3=$'\e[92mMulti-master setup: \e[0m'
         multi_master_options=('Loadbalancer' 'Back' 'Launch' 'Master nodes' 'Worker nodes' 'Reset configuration')
         select multi_master_option in "${multi_master_options[@]}"; do
           if ! [[ "$REPLY" =~ $re ]] || [ "$REPLY" -gt 6 -o "$REPLY" -lt 1 ]; then
@@ -49,7 +49,7 @@ select option in "${!setupActions[@]}"; do
                   if [ "$lb_addr_and_port" = "q" ]; then
                     rm -f /tmp/lb_addr_and_port.txt
                     unset lb_addr_and_port
-                    PS3=$'\e[01;32mSelection: \e[0m'
+                    PS3=$'\e[92mSelection: \e[0m'
                     break 1
                   fi
                 done
@@ -81,7 +81,7 @@ select option in "${!setupActions[@]}"; do
                 fi
                 if [ ! -z "$lb_address" ]; then
                   lb_choices=('haproxy' 'nginx' 'envoy')
-                  PS3=$'\e[01;32mChoose loadbalancer(q - quit): \e[0m'
+                  PS3=$'\e[92mChoose loadbalancer(q - quit): \e[0m'
                   select lb_choice in "${lb_choices[@]}"; do
                     if [ "$REPLY" = "q" ]; then
                       err "Cancelled load balancer type selection"
@@ -112,7 +112,7 @@ select option in "${!setupActions[@]}"; do
                   done
                 fi
                 echo ""
-                PS3=$'\e[01;32mCluster setup: \e[0m'
+                PS3=$'\e[92mCluster setup: \e[0m'
                 ;;
 
               'Master nodes')
@@ -172,7 +172,7 @@ select option in "${!setupActions[@]}"; do
                   fi
                 fi
                 echo ""
-                PS3=$'\e[01;32mCluster setup: \e[0m'
+                PS3=$'\e[92mCluster setup: \e[0m'
                 ;;
 
               'Worker nodes')
@@ -232,7 +232,7 @@ select option in "${!setupActions[@]}"; do
                 fi
 
                 echo ""
-                PS3=$'\e[01;32mCluster setup: \e[0m'
+                PS3=$'\e[92mCluster setup: \e[0m'
                 ;;
               'Back')
                 echo "Exited multi-master setup"
@@ -339,7 +339,7 @@ select option in "${!setupActions[@]}"; do
                   err "One or more configurations are not valid - not proceeding with cluster launch"
                 fi
                 echo ""
-                PS3=$'\e[01;32mSelection: \e[0m'
+                PS3=$'\e[92mSelection: \e[0m'
                 ;;
             esac
           fi

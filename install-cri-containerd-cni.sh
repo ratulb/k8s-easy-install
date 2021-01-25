@@ -4,7 +4,7 @@ sudo apt update
 command -v wget &> /dev/null
 [ $? -eq 0 ] || sudo apt install -y wget 
 
-echo -e "\e[1;32mInstalling cri-containerd-cni on $(hostname)($(hostname -i)).\e[0m"
+echo -e "\e[92mInstalling cri-containerd-cni on $(hostname)($(hostname -i)).\e[0m"
 
 sudo systemctl stop containerd
 sudo systemctl disable containerd
@@ -45,5 +45,5 @@ if [ ! -z "$pod_ids" ]; then
   crictl stopp $pod_ids && crictl rmp $pod_ids
 fi
 
-echo -e "\e[1;32mInstalled cri-containerd-cni on $(hostname)($(hostname -i)).\e[0m"
+echo -e "\e[92mInstalled cri-containerd-cni on $(hostname)($(hostname -i)).\e[0m"
 

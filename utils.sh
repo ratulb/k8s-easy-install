@@ -29,7 +29,7 @@ read_setup() {
 "read_setup"
 
 prnt() {
-  echo -e "\e[1;32m$1\e[0m"
+  echo -e "\e[92m$1\e[0m"
 }
 
 err() {
