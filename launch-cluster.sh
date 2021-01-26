@@ -62,8 +62,6 @@ sed -i "s/#masters#/'$masters'/g" kubeadm-init.sh.tmp
 sed -i "s/#lb_port#/$lb_port/g" kubeadm-init.sh.tmp
 sed -i "s/#pod_network_cidr#/$pod_network_cidr/g" kubeadm-init.sh.tmp
 sed -i "s/#loadbalancer#/$loadbalancer/g" kubeadm-init.sh.tmp
-#cp master-join-monitor.cmd mjm.cmd.tmp
-#sed -i "s|#wait_interval_post_join_cmd#|$wait_interval_post_join_cmd|g" mjm.cmd.tmp
 if [ ! -z "$loadbalancer" ]; then
   case $lb_type in
     haproxy)
@@ -90,29 +88,28 @@ count=0
 #Masters' installation
 for _master in $masters; do
   if [ "$_master" = "$this_host_name" ] || [ "$_master" = "$this_host_ip" ]; then
-    prnt "Installing kubeadm kubelet kubectl on master(this machine $_master)"
+    prnt "Installing docker kubeadm kubelet kubectl on master(this machine $_master)"
+    . install-docker.sh
     . kube-remove.sh
     . install-kubeadm.sh
-    prnt "Installing cri containerd cni on master(this computer $_master)"
-    . install-cri-containerd-cni.sh
     if [ "$count" -eq 0 ]; then
       . kubeadm-init.sh.tmp
       . prepare-cluster-join.sh
+      . install-cni-pluggin.sh
     else
       . master-join-cluster.cmd
     fi
-    . configure-cgroup-driver.sh
   else
-    prnt "Installing kubeadm kubelet kubectl on remote master($_master)"
+    prnt "Installing docker kubeadm kubelet kubectl on remote master($_master)"
+    remote_script $_master install-docker.sh
     remote_script $_master kube-remove.sh
     remote_script $_master install-kubeadm.sh
-    prnt "Installing cri containerd cni on remote master($_master)"
-    remote_script $_master install-cri-containerd-cni.sh
     if [ "$count" -eq 0 ]; then
       remote_script $_master kubeadm-init.sh.tmp
       . copy-init-log.sh $_master
       . prepare-cluster-join.sh
       prnt "Installing weave cni pluggin"
+      remote_script $_master install-cni-pluggin.sh
     else
       remote_script $_master master-join-cluster.cmd
     fi
@@ -121,8 +118,6 @@ for _master in $masters; do
     else
       . copy-kube-config.sh 'to' $_master
     fi
-    . copy-config-toml.sh $_master
-    remote_script $_master configure-cgroup-driver.sh
   fi
   ((count++))
 done
@@ -131,26 +126,20 @@ done
 for worker in $workers; do
   if [ "$worker" = "$this_host_name" ] || [ "$worker" = "$this_host_ip" ]; then
     prnt "Installing kubeadm kubelet kubectl on worker $worker"
+    . install-docker.sh
     . kube-remove.sh
     . install-kubeadm.sh
-    prnt "Installing cri containerd cni on worker $worker"
-    . install-cri-containerd-cni.sh
     prnt "$worker joining the cluster"
     . worker-join-cluster.cmd
-    . configure-cgroup-driver.sh
   else
     prnt "Installing kubeadm kubelet kubectl on worker $worker"
+    remote_script $worker install-docker.sh
     remote_script $worker kube-remove.sh
     remote_script $worker install-kubeadm.sh
-    prnt "Installing cri containerd cni on $worker"
-    remote_script $worker install-cri-containerd-cni.sh
     prnt "$worker joining the cluster"
     remote_script $worker worker-join-cluster.cmd
-    . copy-config-toml.sh $worker
-    remote_script $worker configure-cgroup-driver.sh
   fi
 done
-. install-cni-pluggin.sh
 . init-self.sh
 . test-commands.sh
 . clean-trash.sh
