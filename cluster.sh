@@ -7,7 +7,6 @@ declare -A setupActions
 setupActions+=(['Quit']='quit')
 setupActions+=(['Cluster setup']='cluster-setup')
 setupActions+=(['Console']='console')
-setupActions+=(['Containerd status']='containerd-status')
 setupActions+=(['Kubelet status']='kubelet-status')
 setupActions+=(['System pod status']='system-pod-status')
 setupActions+=(['Load balancer status']='lb-status')
@@ -17,7 +16,7 @@ re="^[0-9]+$"
 PS3=$'\e[92mSelection: \e[0m'
 select option in "${!setupActions[@]}"; do
 
-  if ! [[ "$REPLY" =~ $re ]] || [ "$REPLY" -gt 8 -o "$REPLY" -lt 1 ]; then
+  if ! [[ "$REPLY" =~ $re ]] || [ "$REPLY" -gt 7 -o "$REPLY" -lt 1 ]; then
     err "Invalid selection!"
   else
     case "${setupActions[$option]}" in
