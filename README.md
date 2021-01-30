@@ -9,7 +9,7 @@ How to setup:
 
 Check this repository out. 
 
-git clone https://github.com/ratulb/k8s-easy-install.git
+git clone https://github.com/ratulb/k8s-easy-install.git -b containerd-main
 
 
 cd k8s-easy-install && ./cluster.sh
