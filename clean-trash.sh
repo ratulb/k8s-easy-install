@@ -9,6 +9,5 @@ if [ -z "$debug" ]; then
   rm -f nginx.draft
   rm -f haproxy.draft
 fi
-
 rm -f 0
 

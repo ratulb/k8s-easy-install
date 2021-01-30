@@ -4,13 +4,13 @@
 . nginx/stop-nginx.sh
 . envoy/stop-envoy.sh
 prnt "Starting haproxy on $loadbalancer"
-if [ "$this_host_ip" != "$loadbalancer" ]; then
-  . execute-command-remote.sh $loadbalancer sed -i '/net.ipv4.ip_nonlocal_bind/d' /etc/sysctl.conf
-  . execute-command-remote.sh $loadbalancer echo 'net.ipv4.ip_nonlocal_bind=1' >>/etc/sysctl.conf
-  . execute-command-remote.sh $loadbalancer sysctl -p
-  . execute-command-remote.sh $loadbalancer systemctl daemon-reload
-  . execute-command-remote.sh $loadbalancer systemctl enable haproxy
-  . execute-command-remote.sh $loadbalancer systemctl restart haproxy
+if [[ "$this_host_ip" != "$loadbalancer" ]] && [[ "$this_host_name" != "$loadbalancer" ]]; then
+  remote_cmd $loadbalancer sed -i '/net.ipv4.ip_nonlocal_bind/d' /etc/sysctl.conf
+  remote_cmd $loadbalancer echo 'net.ipv4.ip_nonlocal_bind=1' >>/etc/sysctl.conf
+  remote_cmd $loadbalancer sysctl -p
+  remote_cmd $loadbalancer systemctl daemon-reload
+  remote_cmd $loadbalancer systemctl enable haproxy
+  remote_cmd $loadbalancer systemctl restart haproxy
 else
   sudo sed -i '/net.ipv4.ip_nonlocal_bind/d' /etc/sysctl.conf
   sudo echo 'net.ipv4.ip_nonlocal_bind=1' >>/etc/sysctl.conf

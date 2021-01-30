@@ -6,10 +6,10 @@ prnt "checking cluster nodes status"
 rm -f status-report
 kubectl get nodes | tee status-report
 status=$(cat status-report | awk '{if(NR>1)print}' | awk '{print $3}' | sort -u | tr "\n" " " | xargs)
-i=15
-while [ "$i" -gt 0 ] && [[ ! $status = "NotReady" ]] ; do
+i=10
+while [ "$i" -gt 0 ] && [[  $status =~ *"NotReady"* ]] ; do
   sleep $i
-  i=$((i-5))
+  i=$((i-3))
   rm status-report
   kubectl get nodes | tee status-report
   status=$(cat status-report | awk '{if(NR>1)print}' | awk '{print $3}' | sort -u | tr "\n" " " | xargs)
@@ -26,14 +26,14 @@ prnt "Checking pod status"
 
 rm status-report 2> /dev/null
 kubectl get pods | tee status-report
-status=$(cat status-report | awk '{if(NR>1)print}' | awk '{print $3}' | tr "\n" " ")
-
-i=15
-while [ "$i" -gt 0 ] && [[ ! $status =~ "Running Running Running" ]] ; do
+status=$(cat status-report | awk '{if(NR>1)print}' | awk '{print $3}' | sort -u | tr "\n" " " | xargs)
+cat status-report
+i=10
+while [ "$i" -gt 0 ] && [[  $status != "Running" ]] ; do
   sleep $i
-  i=$((i-5))
+  i=$((i-3))
   rm status-report
   kubectl get pods | tee status-report
-  status=$(cat status-report | awk '{if(NR>1)print}' | awk '{print $3}' | tr "\n" " ")
+  status=$(cat status-report | awk '{if(NR>1)print}' | awk '{print $3}' | sort -u | tr "\n" " " | xargs)
 done
 

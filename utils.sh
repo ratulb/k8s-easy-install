@@ -1,12 +1,9 @@
 #!/usr/bin/env bash
 export usr=$(whoami)
 read_setup() {
-  master=
-  workers=
-  masters=
   while IFS="=" read -r key value; do
     case "$key" in
-      "master") export master="$value" ;;
+      #"master") export master="$value" ;;
       "masters") export masters="$value" ;;
       "loadbalancer") export loadbalancer="$value" ;;
       "workers") export workers="$value" ;;
@@ -14,14 +11,11 @@ read_setup() {
       "lb_type") export lb_type="$value" ;;
       "pod_network_cidr") export pod_network_cidr="$value" ;;
       "sleep_time") export sleep_time="$value" ;;
-      "cri_containerd_cni_ver") export CONTAINERD_VER="$value" ;;
-      "wait_interval_post_join_cmd") export wait_interval_post_join_cmd="$value" ;;
       "#"*) ;;
 
     esac
   done <"setup.conf"
 
-  sed -i "s|#CONTAINERD_VER#|$CONTAINERD_VER|g" install-cri-containerd-cni.sh
   export this_host_ip=$(echo $(hostname -i) | cut -d' ' -f1)
   export this_host_name=$(hostname)
 }
@@ -29,7 +23,7 @@ read_setup() {
 "read_setup"
 
 prnt() {
-  echo -e "\e[1;32m$1\e[0m"
+  echo -e "\e[92m$1\e[0m"
 }
 
 err() {
@@ -63,10 +57,10 @@ is_ip() {
   fi
 }
 can_access_ip() {
-  if is_address_local "$1"; then
+  if is_address_local $1; then
     return 0
   else
-    . execute-command-remote.sh $1 ls -la &>/dev/null
+    remote_cmd $1 ls -la &>/dev/null
   fi
 }
 
@@ -83,11 +77,51 @@ is_port_valid() {
 
 is_address_local() {
   local addr=$1
-  if [[ "$addr" = $this_host_ip ]] || [[ "$addr" = "$this_host_name" ]] || [[ "$addr" = "127.0.0.1" ]] || [[ "$addr" = "localhost" ]]; then
+  if [[ "$addr" = $this_host_ip ]] || [[ "$addr" = "$this_host_name" ]] || [[ "$addr" = "127.0.0.1" ]] || [[ "$
+ad
+dr" = "localhost" ]]; then
     return 0
   else
     return 1
   fi
+}
+can_access_address() {
+  local _addr=$1
+  if ! is_ip $_addr && ! is_host_name_ok $_addr; then
+    err "Address not is not valid"
+    return 1
+  fi
+  if is_address_local $_addr; then
+    return 0
+  else
+    remote_cmd $_addr ls -la &>/dev/null
+    ([ "$?" -eq 0 ] && return 0) || return 1
+  fi
+}
+
+remote_script() {
+  #prnt "Executing on $1"
+  sudo -u $usr ssh -q -o StrictHostKeyChecking=no -o ConnectTimeout=3 $1 <$2
+}
+
+remote_cmd() {
+  remote_host=$1
+  if [ -z "$quiet" ]; then
+    : #prnt "Executing command on $remote_host"
+  fi
+  shift
+  args="$@"
+  sudo -u $usr ssh -q -o "StrictHostKeyChecking=no" -o "ConnectTimeout=3" $remote_host $args
+}
+
+remote_copy() {
+  sudo -u $usr scp -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $1 $2
+}
+remote_call() {
+  debug "Executing a return on $1"
+  remote_copy $2 $1:~/
+  remote_cmd $1 ". $2"
+  #sudo -u $usr ssh -q -o "LogLevel=ERROR" -o "StrictHostKeyChecking no" -o "ConnectTimeout=5" $1 < $2 &> /dev/null
 }
 
 lb_address_valid() {
@@ -125,7 +159,7 @@ validate_single_master_configuration() {
   if is_address_local $_mstr_ip; then
     m_ip=$(hostname -i)
   else
-    m_ip=$(quiet=yes . execute-command-remote.sh $_mstr_ip hostname -i)
+    m_ip=$(quiet=yes remote_cmd $_mstr_ip hostname -i)
   fi
 
   debug "_mstr_ip $_mstr_ip, _workrs_ $_workrs_ and m_ip $m_ip"
@@ -134,7 +168,7 @@ validate_single_master_configuration() {
       if is_address_local $_w; then
         worker_ips+="$(hostname -i) "
       else
-        worker_ips+="$(quiet=yes . execute-command-remote.sh $_w hostname -i) "
+        worker_ips+="$(quiet=yes remote_cmd $_w hostname -i) "
       fi
     done
     worker_ips=$(echo $worker_ips | xargs)
@@ -159,7 +193,7 @@ validate_multi-master-configuration() {
       if is_address_local $_w; then
         worker_ips+="$(hostname -i) "
       else
-        worker_ips+="$(quiet=yes . execute-command-remote.sh $_w hostname -i) "
+        worker_ips+="$(quiet=yes remote_cmd $_w hostname -i) "
       fi
     done
   fi
@@ -170,15 +204,17 @@ validate_multi-master-configuration() {
     if is_address_local $_m; then
       master_ips+="$(hostname -i) "
     else
-      master_ips+="$(quiet=yes . execute-command-remote.sh $_m hostname -i) "
+      master_ips+="$(quiet=yes remote_cmd $_m hostname -i) "
     fi
   done
   master_ips=$(echo $master_ips | xargs)
   lb_ip=''
-  if is_address_local $_lb_addr; then
-    lb_ip=$(hostname -i)
-  else
-    lb_ip=$(quiet=yes . execute-command-remote.sh $_lb_addr hostname -i)
+  if [ ! -z $_lb_addr ]; then
+    if is_address_local $_lb_addr; then
+      lb_ip=$(hostname -i)
+    else
+      lb_ip=$(quiet=yes remote_cmd $_lb_addr hostname -i)
+    fi
   fi
 
   if [ ! -z "$worker_ips" ]; then
@@ -191,33 +227,24 @@ validate_multi-master-configuration() {
       done
     done
   fi
-  m_and_w_ips="$master_ips $worker_ips"
-  m_and_w_ips=$(echo $m_and_w_ips | xargs)
-  for _ip in $m_and_w_ips; do
-    if [[ "$_ip" = "$_lb_addr" ]] && [[ "$_lb_port" -eq 6443 ]]; then
-      err "Loadbalancer address collides with ip $_ip yet loadbalancer port is 6443"
-      return 1
-    fi
-  done
-
+  if [ ! -z "$_lb_addr" ]; then
+    m_and_w_ips="$master_ips $worker_ips"
+    m_and_w_ips=$(echo $m_and_w_ips | xargs)
+    for _ip in $m_and_w_ips; do
+      if [[ "$_ip" = "$_lb_addr" ]] && [[ "$_lb_port" -eq 6443 ]]; then
+        err "Loadbalancer address collides with ip $_ip yet loadbalancer port is 6443"
+        return 1
+      fi
+    done
+  fi
 }
-
-configure_single_master_setup() {
-  local _master_=$1
-  local _workers_=$2
-  if [ -z "$_master_" ]; then
-    err "Master is empty"
-    return 1
-  else
-    sed -i "s/master=.*/master=$_master_/g" setup.conf
-  fi
-  if [ ! -z "$_workers_" ]; then
-    sed -i "s/workers=.*/workers=$_workers_/g" setup.conf
-  else
-    sed -i "s/workers=.*/workers=/g" setup.conf
-  fi
+reset_setup_configuration() {
+  sed -i "s/workers=.*/workers=/g" setup.conf
   sed -i "s/masters=.*/masters=/g" setup.conf
   sed -i "s/loadbalancer=.*/loadbalancer=/g" setup.conf
+  sed -i "s/lb_port=.*/lb_port=/g" setup.conf
+  sed -i "s/lb_type=.*/lb_type=/g" setup.conf
+  sed -i "s/pod_network_cidr=.*/pod_network_cidr=/g" setup.conf
 }
 
 configure_multi_master_setup() {
@@ -228,17 +255,14 @@ configure_multi_master_setup() {
   local _workers_=$5
 
   if [ -z "$_lb_addr_" ]; then
-    err "Loadbalancer address is not valid"
-    return 1
+    warn "Loadbalancer address is not valid"
   fi
   if [ -z "$_lb_port_" ]; then
-    err "Loadbalancer port is not valid"
-    return 1
+    warn "Loadbalancer port is not valid"
   fi
 
   if [ -z "$_lb_type_" ]; then
-    err "Loadbalancer type is not valid"
-    return 1
+    warn "Loadbalancer type is not valid"
   fi
   if [ -z "$_masters_" ]; then
     err "Master nodes entries are not valid"
@@ -247,6 +271,17 @@ configure_multi_master_setup() {
   if [ -z "$_workers_" ]; then
     warn "Workers nodes are empty!"
   fi
+  [[ ! -z "$_lb_addr_" ]] && [[ ! -z "$_lb_port_" ]] && [[ ! -z "$_lb_type_" ]] && all_specified=yes
+  [[ -z "$_lb_addr_" ]] && [[ -z "$_lb_port_" ]] && [[ -z "$_lb_type_" ]] && none_specified=yes
+  if [[ "$all_specified" = "yes" ]] || [[ "$none_specified" = "yes" ]]; then
+    sed -i "s/master=.*/master=/g" setup.conf
+    sed -i "s/loadbalancer=.*/loadbalancer=$_lb_addr_/g" setup.conf
+    sed -i "s/lb_port=.*/lb_port=$_lb_port_/g" setup.conf
+    sed -i "s/lb_type=.*/lb_type=$_lb_type_/g" setup.conf
+  else
+    err "Loadbalancer configuration is not complete - configuration failure"
+    return 1
+  fi
 
   sed -i "s/masters=.*/masters=$_masters_/g" setup.conf
   if [ ! -z "$_workers_" ]; then
@@ -254,10 +289,14 @@ configure_multi_master_setup() {
   else
     sed -i "s/workers=.*/workers=/g" setup.conf
   fi
-  sed -i "s/master=.*/master=/g" setup.conf
-  sed -i "s/loadbalancer=.*/loadbalancer=$_lb_addr_/g" setup.conf
-  sed -i "s/lb_port=.*/lb_port=$_lb_port_/g" setup.conf
-  sed -i "s/lb_type=.*/lb_type=$_lb_type_/g" setup.conf
+  [[ ! -z "$_lb_addr_" ]] && [[ ! -z "$_lb_port_" ]] && [[ ! -z "$_lb_type_" ]] && all_specified=yes
+  [[ -z "$_lb_addr_" ]] && [[ -z "$_lb_port_" ]] && [[ -z "$_lb_type_" ]] && none_specified=yes
+  if [[ "$all_specified" = "yes" ]] || [[ "$none_specified" = "yes" ]]; then
+    sed -i "s/master=.*/master=/g" setup.conf
+    sed -i "s/loadbalancer=.*/loadbalancer=$_lb_addr_/g" setup.conf
+    sed -i "s/lb_port=.*/lb_port=$_lb_port_/g" setup.conf
+    sed -i "s/lb_type=.*/lb_type=$_lb_type_/g" setup.conf
+  fi
 }
 
 #Launch busybox container called debug
@@ -266,7 +305,7 @@ k8_debug() {
   kubectl run -i --tty --rm debug --image=busybox:1.28 --restart=Never -- sh
 }
 
-function install_etcdctl() {
+install_etcdctl() {
   ETCD_VER="3.4.14"
   ETCD_VER=${1:-$ETCD_VER}
   DOWNLOAD_URL=https://github.com/etcd-io/etcd/releases/download

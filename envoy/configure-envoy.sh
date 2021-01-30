@@ -29,9 +29,9 @@ if [[ "$this_host_ip" = "$loadbalancer" ]] || [[ "$this_host_name" = "$loadbalan
   sudo cp envoy.draft /etc/envoy/envoy.yaml
   sudo cp envoy/envoy.service /etc/systemd/system/
 else
-  . execute-command-remote.sh $loadbalancer mkdir -p /etc/envoy
-  sudo -u $usr scp envoy.draft $loadbalancer:/etc/envoy/envoy.yaml
-  sudo -u $usr scp envoy/envoy.service $loadbalancer:/etc/systemd/system/
+  remote_cmd $loadbalancer mkdir -p /etc/envoy
+  remote_copy envoy.draft $loadbalancer:/etc/envoy/envoy.yaml
+  remote_copy envoy/envoy.service $loadbalancer:/etc/systemd/system/
 fi
 
-prnt "Configured envoy @$loadbalancer"
+prnt "Configured envoy on $loadbalancer"
