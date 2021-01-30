@@ -5,10 +5,10 @@
 . envoy/stop-envoy.sh
 
 prnt "Starting nginx on $loadbalancer"
-if [ "$this_host_ip" != "$loadbalancer" ]; then
-  . execute-command-remote.sh $loadbalancer systemctl daemon-reload
-  . execute-command-remote.sh $loadbalancer systemctl enable nginx
-  . execute-command-remote.sh $loadbalancer systemctl restart nginx
+if [[ "$this_host_ip" != "$loadbalancer" ]] && [[ "$this_host_name" != "$loadbalancer" ]]; then
+  remote_cmd $loadbalancer systemctl daemon-reload
+  remote_cmd $loadbalancer systemctl enable nginx
+  remote_cmd $loadbalancer systemctl restart nginx
 else
   sudo systemctl daemon-reload
   sudo systemctl enable nginx
