@@ -1,5 +1,5 @@
 
-sudo apt update
+apt update  --fix-missing
 home_url=$(sudo cat /etc/*release | grep HOME_URL | cut -d'"' -f2)
 sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
 if [ "$home_url" = "https://www.debian.org/" ]; then
@@ -11,6 +11,6 @@ curl -sL 'https://getenvoy.io/gpg' | sudo apt-key add -
 # verify the key
 apt-key fingerprint 6FF974DB | grep "5270 CEAC"
 sudo add-apt-repository "deb [arch=amd64] https://dl.bintray.com/tetrate/getenvoy-deb $(lsb_release -cs) stable"
-sudo apt update
+apt update  --fix-missing
 sudo apt install -y getenvoy-envoy
 
