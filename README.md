@@ -18,6 +18,6 @@ Follow the menu driven options to create a single master or multi-master cluster
 
 These steps have been verified on debian buster and Ubuntu 16.04/18.04/20.04.
 
-Cross reference: http://rbsomeg.blogspot.com/2021/01/multi-master-kubernetes-on-containerd.html
+
 
 
