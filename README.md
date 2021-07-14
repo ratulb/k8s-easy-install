@@ -26,6 +26,11 @@ Next, setup the master node - giving the ip address of the local host. Hit enter
 
 No worker nodes to be selected - all work loads would be on the same node.
 
-Final step is the launch step. Don't hit enter - just press 'y'.
+So the sequence of cluster setup is:
+- Load balancer
+- Master node
+- Launch
+
+Don't hit enter - just press 'y'.
 
 
