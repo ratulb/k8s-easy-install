@@ -18,6 +18,14 @@ Follow the menu driven options to create a single master or multi-master cluster
 
 ## These steps have been verified on debian buster and Ubuntu 16.04/18.04/20.04.
 
+## Notes for single instance installation
+By default - the installtion assumes a multi node cluster - where load balancer fronting the kube api servers is expected to be on a separate box. In a single node cluster where - load balancer, kube master and worker nodes are all in one box - we need to select a different port for the load balancer - by default it shows as [localhost ip]:6643.
+For single node choose a different port > 1000;
 
+Next, setup the master node - giving the ip address of the local host. Hit enter twice.
+
+No worker nodes to be selected - all work loads would be on the same node.
+
+Final step is the launch step. Don't hit enter - just press 'y'.
 
 
