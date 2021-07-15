@@ -12,7 +12,7 @@ Check this repository out.
 git clone https://github.com/ratulb/k8s-easy-install.git
 
 
-cd k8s-easy-install && ./cluster.sh
+<b> `cd k8s-easy-install && ./cluster.sh`</b>
 
 Follow the menu driven options to create a single master or multi-master cluster.
 
