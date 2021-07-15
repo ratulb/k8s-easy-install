@@ -1,5 +1,5 @@
 ## k8s-easy-install
-## Setup a kubernetes cluster by running a simple script(Ansible is great and we love it but here we do without it) fronted by haproxy/nginx/envoy loadbalancer.
+### Setup a kubernetes cluster by running a simple script(Ansible is great and we love it but here we do without it) fronted by haproxy/nginx/envoy loadbalancer.
 
 Take the hassle out of logging into each machine to install containerd, kube components & network plugin. Instead manage everything from a single machine.The machine from where the script is launched can be a part of the cluster too. 
 
