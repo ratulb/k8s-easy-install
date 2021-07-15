@@ -31,6 +31,6 @@ So the sequence of cluster setup is:
 - Master node
 - Launch
 
-Don't hit enter - just press 'y'.
+<b> Don't hit enter - just press 'y'.</b>
 
 
