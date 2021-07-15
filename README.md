@@ -26,7 +26,7 @@ Next, setup the master node - giving the ip address of the local host. <b> Hit e
 
 No worker nodes to be selected - all work loads would be on the same node.
 
-So the sequence of cluster setup is:
+<b> So the sequence of single node cluster setup is:</b>
 - Load balancer
 - Master node
 - Launch
