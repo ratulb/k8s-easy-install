@@ -89,7 +89,7 @@ count=0
 for _master in $masters; do
   if [ "$_master" = "$this_host_name" ] || [ "$_master" = "$this_host_ip" ]; then
     prnt "Installing docker kubeadm kubelet kubectl on master(this machine $_master)"
-    . install-docker.sh
+#    . install-docker.sh
     . kube-remove.sh
     . install-kubeadm.sh
     if [ "$count" -eq 0 ]; then
@@ -101,7 +101,7 @@ for _master in $masters; do
     fi
   else
     prnt "Installing docker kubeadm kubelet kubectl on remote master($_master)"
-    remote_script $_master install-docker.sh
+ #   remote_script $_master install-docker.sh
     remote_script $_master kube-remove.sh
     remote_script $_master install-kubeadm.sh
     if [ "$count" -eq 0 ]; then
@@ -126,14 +126,14 @@ done
 for worker in $workers; do
   if [ "$worker" = "$this_host_name" ] || [ "$worker" = "$this_host_ip" ]; then
     prnt "Installing kubeadm kubelet kubectl on worker $worker"
-    . install-docker.sh
+  #  . install-docker.sh
     . kube-remove.sh
     . install-kubeadm.sh
     prnt "$worker joining the cluster"
     . worker-join-cluster.cmd
   else
     prnt "Installing kubeadm kubelet kubectl on worker $worker"
-    remote_script $worker install-docker.sh
+   # remote_script $worker install-docker.sh
     remote_script $worker kube-remove.sh
     remote_script $worker install-kubeadm.sh
     prnt "$worker joining the cluster"
