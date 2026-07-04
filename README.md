@@ -1,6 +1,6 @@
 # k8s-easy-install
 
-Spin up a Kubernetes cluster (single- or multi-master) from one machine — **no Ansible, no logging into each node** individually. Fronted by a choice of load balancers (haproxy, nginx, or envoy).
+Spin up a Kubernetes cluster (single- or multi-master) from one machine — **no Ansible, no logging into each node** individually. Fronted by a choice of load balancers (**haproxy, nginx, or envoy**).
 
 ```
 Controller ──SSH──► Loadbalancer (haproxy/nginx/envoy)
