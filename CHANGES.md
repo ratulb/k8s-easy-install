@@ -154,3 +154,80 @@ Tracking updates made during the 2026 revival of k8s-easy-install.
 - All three LB types (envoy, nginx, haproxy) tested end-to-end on single-node cluster.
 - Each passes: LB install → kubeadm init → Calico CNI → nginx demo deployment.
 - `prepare-cluster-join.sh` verified with mock kubeadm-init.log (multi-line join commands with `\` continuations).
+
+## Multi-node cluster working (Jul 4 2026)
+
+### Real multi-node deployment complete
+- **Controller**: vm (Debian 13 trixie, 10.160.0.7)
+- **First master**: localhost (= vm), kubeadm init with haproxy LB on :6643
+- **Worker**: box (Ubuntu 22.04 jammy, 10.160.0.8) joined successfully
+- Both nodes Ready, Calico CNI pods running on both, cross-node pod communication working
+
+### Fix: `install-kubeadm.sh` — install containerd if missing
+- On a fresh Ubuntu 22.04 (no Docker history), containerd is not pre-installed.
+- The script called `sudo containerd config default` which fails with "command not found".
+- Added: `if ! command -v containerd &>/dev/null; then sudo apt install -y containerd; fi` before containerd config step.
+- Also added `sudo systemctl enable containerd` for proper startup on boot.
+
+### Fix: `cleanup-all.sh` — auto-clean all remote nodes
+- Previously printed "Note: run 'sudo bash kube-remove.sh' on each remote master/worker node to clean them too." — requiring manual SSH to every node.
+- Now iterates `$masters` and `$workers` from `setup.conf` and runs `remote_script "$_node" kube-remove.sh` on each, skipping the local node.
+- Full teardown is now fully automated from `cluster.sh` menu option 6: no manual intervention needed.
+
+### Fix: `launch-cluster.sh` — `return 1` → `_ret` for dual context
+- When run directly as `bash launch-cluster.sh` (not sourced from the menu), `return 1` fails with "can only `return' from a function or sourced script" and execution continues past error checks.
+- Added `_ret()` helper that detects context (`${BASH_SOURCE[0]}` vs `${0}`) and uses `return 1` when sourced or `exit 1` when executed directly.
+- Replaced all 7 error `return 1` calls with `_ret`.
+
+### End-to-end test (Jul 4 2026)
+Full automated pipeline validated from scratch:
+1. `cleanup-all.sh` — nuked both vm (local) and box (remote) automatically
+2. `launch-cluster.sh` — installed everything: haproxy LB → kubeadm init → Calico CNI → worker join → nginx deployment
+3. All 3 nginx pods running, both nodes Ready, no manual steps required
+
+## Milestone 3: Cross-node pod networking (Jul 4 2026)
+
+### Fix: Calico IPIP→VXLAN switch (`install-cni-pluggin.sh`)
+- **Root cause**: Default Calico manifest uses IPIP (`ipipMode: Always`), but IPIP (protocol 4) is blocked by many cloud providers (GCP, etc.). Packets were sent but never received, breaking all cross-node pod communication.
+- **Fix**: Modify the Calico manifest before applying — download to `/tmp/calico.yaml`, sed-swap `CALICO_IPV4POOL_IPIP` from `"Always"` to `"Never"` and `CALICO_IPV4POOL_VXLAN` from `"Never"` to `"Always"`, then apply the modified manifest.
+- On running clusters, the IPPool can be patched in-place via `kubectl patch ippool default-ipv4-ippool --type merge -p '{"spec":{"ipipMode":"Never","vxlanMode":"Always"}}'` followed by restarting calico-node pods.
+
+### Verification: Cross-node pod traffic works both ways
+- Pod on vm (192.168.141.x) → Pod on box (192.168.144.x): HTTP request succeeds, full nginx HTML response received.
+- Pod on box (192.168.144.x) → Pod on vm (192.168.141.x): HTTP request succeeds, full nginx HTML response received.
+- Route table on vm: `192.168.144.192/26 via 192.168.144.194 dev vxlan.calico`
+- Route table on box: `192.168.141.64/26 via 192.168.141.72 dev vxlan.calico`
+- VXLAN tunnel device (`vxlan.calico`) stats show bidirectional packet flow: RX 3742/25, TX 964/14 on each side (symmetric).
+
+## Test: `tests/e2e-multi-node.sh` (Jul 4 2026)
+Automated multi-node end-to-end test added:
+- Builds cluster: `echo 'y' | bash launch-cluster.sh`
+- Cross-node pod networking test:
+  - Creates nginx + busybox pods on both nodes via `nodeSelector`
+  - HTTP GET from control-plane pod → worker pod (verifies response contains "Welcome to nginx")
+  - HTTP GET from worker pod → control-plane pod (verifies same)
+  - Cleans up test pods
+- Tears down cluster: `bash cleanup-all.sh`
+- Reports pass/fail per iteration
+- Usage: `bash tests/e2e-multi-node.sh [iterations]`
+- Verified: 1 iteration passed (build → cross-node test → teardown)
+
+### Bug fix: `pod_network_cidr` cleared by `reset_setup_configuration()`
+- `reset_setup_configuration()` in `utils.sh:245` was zeroing `pod_network_cidr=` on every menu run.
+- `configure_multi_master_setup()` (called by menu) never sets `pod_network_cidr`, so it stayed empty.
+- Fixed: removed the `pod_network_cidr` reset line from `reset_setup_configuration()`.
+- Also fixed a stale/dormant bug: `sed -i "s/master=/g"` on line 274 (typo: `master=` instead of `masters=`) — removed.
+
+## Multi-node pre-requisites discovered during box setup
+
+Before a remote node can be used in the cluster, the controller machine must have:
+
+1. **SSH key authorized** — controller's public key (`~/.ssh/id_ed25519.pub`) added to remote node's `~/.ssh/authorized_keys`.
+2. **Passwordless sudo** — SSH user must be able to run `sudo` without a password prompt. On the remote node:
+   ```bash
+   echo 'username ALL=(ALL) NOPASSWD: ALL' | sudo tee /etc/sudoers.d/username
+   ```
+3. **Network connectivity** — all nodes must be able to reach each other on the ports used by k8s and the LB.
+4. **Consistent username** — SSH user should be the same on controller and remote nodes (simplifies script assumptions), though not strictly required if SSH config is set up.
+
+These are documented in `AGENTS.md` under "Pre-requisites for multi-node testing".

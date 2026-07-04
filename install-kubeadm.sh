@@ -23,11 +23,17 @@ if command -v docker &>/dev/null; then
   sudo apt purge -y docker-ce docker-ce-cli docker-buildx-plugin docker-ce-rootless-extras docker-compose-plugin 2>/dev/null || true
 fi
 
+# Install containerd (CRI runtime)
+if ! command -v containerd &>/dev/null; then
+  sudo apt install -y containerd
+fi
+
 # Configure containerd for CRI
 sudo mkdir -p /etc/containerd
 sudo containerd config default | sudo tee /etc/containerd/config.toml > /dev/null
 sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
 sudo systemctl restart containerd
+sudo systemctl enable containerd
 
 # Add the new Kubernetes apt repository (pkgs.k8s.io)
 sudo apt install -y apt-transport-https ca-certificates curl gnupg

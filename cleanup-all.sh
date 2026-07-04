@@ -62,6 +62,15 @@ fi
 echo "Cleaning up Kubernetes..."
 . kube-remove.sh
 
+# ----- Remote Kubernetes cleanup -----
+for _node in $masters $workers; do
+  if is_address_local "$_node"; then
+    continue
+  fi
+  echo "Cleaning up Kubernetes on $_node..."
+  remote_script "$_node" kube-remove.sh
+done
+
 # ----- Temp files -----
 . clean-trash.sh
 
@@ -70,4 +79,3 @@ sudo apt update 2>/dev/null || true
 
 echo ""
 echo -e "\e[92m=== Full cleanup complete ===\e[0m"
-echo "Note: run 'sudo bash kube-remove.sh' on each remote master/worker node to clean them too."

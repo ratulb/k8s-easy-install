@@ -109,7 +109,7 @@ remote_cmd() {
   fi
   shift
   args="$@"
-  sudo -u $usr ssh -q -o "StrictHostKeyChecking=no" -o "ConnectTimeout=3" $remote_host $args
+  sudo -u $usr ssh -n -q -o "StrictHostKeyChecking=no" -o "ConnectTimeout=3" $remote_host $args
 }
 
 remote_copy() {
@@ -242,7 +242,6 @@ reset_setup_configuration() {
   sed -i "s/loadbalancer=.*/loadbalancer=/g" setup.conf
   sed -i "s/lb_port=.*/lb_port=/g" setup.conf
   sed -i "s/lb_type=.*/lb_type=/g" setup.conf
-  sed -i "s/pod_network_cidr=.*/pod_network_cidr=/g" setup.conf
 }
 
 configure_multi_master_setup() {
@@ -272,7 +271,6 @@ configure_multi_master_setup() {
   [[ ! -z "$_lb_addr_" ]] && [[ ! -z "$_lb_port_" ]] && [[ ! -z "$_lb_type_" ]] && all_specified=yes
   [[ -z "$_lb_addr_" ]] && [[ -z "$_lb_port_" ]] && [[ -z "$_lb_type_" ]] && none_specified=yes
   if [[ "$all_specified" = "yes" ]] || [[ "$none_specified" = "yes" ]]; then
-    sed -i "s/master=.*/master=/g" setup.conf
     sed -i "s/loadbalancer=.*/loadbalancer=$_lb_addr_/g" setup.conf
     sed -i "s/lb_port=.*/lb_port=$_lb_port_/g" setup.conf
     sed -i "s/lb_type=.*/lb_type=$_lb_type_/g" setup.conf

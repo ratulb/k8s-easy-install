@@ -1,30 +1,32 @@
 #!/usr/bin/env bash
 . utils.sh
+# Allow this script to work both when sourced (from cluster.sh menu) and executed directly
+_ret() { [[ "${BASH_SOURCE[0]}" != "${0}" ]] && return 1 || exit 1; }
 if [[ -z "$masters" ]]; then
   err "No master nodes provided"
-  return 1
+  _ret
 fi
 master_count=$(echo $masters | wc -w)
 if [[ "$master_count" -gt 1 ]] && ([[ -z $loadbalancer ]] || [[ -z "$lb_type" ]] || [[ -z "$lb_port" ]]); then
   err "For multi-master setup loadbalancer is needed - but configuration not correct"
-  return 1
+  _ret
 fi
 if ([[ ! -z "$loadbalancer" ]] && ([[ -z "$lb_type" ]] || [[ -z "$lb_port" ]])) || ([[ ! -z "$lb_type" ]] && ([[ -z "$loadbalancer" ]] || [[ -z "$lb_port" ]])) || ([[ ! -z "$lb_port" ]] && ([[ -z "$lb_type" ]] || [[ -z "$loadbalancer" ]])); then
   err "Loadbalancer configuration is not complete"
-  return 1
+  _ret
 fi
 if [ ! -z "$loadbalancer" ]; then
   prnt "Checking connectivity to loadbalancer..."
   if ! can_access_address $loadbalancer; then
     err "Loadbalancer is provided but can not access loadbalancer at $loadbalancer"
-    return 1
+    _ret
   fi
 fi
 prnt "Checking connectivity to master node(s)..."
 for _mstr in $masters; do
   if ! can_access_address $_mstr; then
     err "Can not access master address $_mstr"
-    return 1
+    _ret
   fi
 done
 if [ ! -z "$workers" ]; then
@@ -32,7 +34,7 @@ if [ ! -z "$workers" ]; then
   for wokr in $workers; do
     if ! can_access_address $wokr; then
       err "Can not access worker $wokr"
-      return 1
+      _ret
     fi
   done
 fi
@@ -53,7 +55,7 @@ re proceeding!"
 read -p "Proceed with installation(y)? " -n 1 -r
 if [[ ! "$REPLY" =~ ^[Yy]$ ]]; then
   err "\nAborted cluster setup\n"
-  return 1
+  _ret
 fi
 echo ""
 
@@ -87,7 +89,7 @@ fi
 count=0
 #Masters' installation
 for _master in $masters; do
-  if [ "$_master" = "$this_host_name" ] || [ "$_master" = "$this_host_ip" ]; then
+  if is_address_local "$_master"; then
     prnt "Installing kubelet kubeadm kubectl on master(this machine $_master)"
     . kube-remove.sh
     . install-kubeadm.sh
@@ -122,7 +124,7 @@ done
 
 #workers' installtion
 for worker in $workers; do
-  if [ "$worker" = "$this_host_name" ] || [ "$worker" = "$this_host_ip" ]; then
+    if is_address_local "$worker"; then
     prnt "Installing kubelet kubeadm kubectl on worker $worker"
     . kube-remove.sh
     . install-kubeadm.sh

@@ -40,7 +40,8 @@
 
 ## Tests
 - `tests/test.sh` — runs `launch-cluster.sh` in a loop (default 20 iterations) with random LB types. Outputs to `tests/test-result.txt`.
-- Run: `bash tests/test.sh [count]`
+- `tests/e2e-single-node.sh` — single-node end-to-end test (LB → install → init → Calico → test).
+- `tests/e2e-multi-node.sh [iterations]` — multi-node end-to-end test: builds cluster, runs cross-node pod networking test (HTTP both ways between nodes), tears down. Repeats per iteration.
 
 ## Gotchas
 - `utils.sh` must be sourced with `. utils.sh` (not `source utils.sh` — but both work in bash). Scripts use `.` form.
@@ -48,7 +49,8 @@
 - `$debug` env var suppresses temp file cleanup and enables debug print via `debug()`.
 - `kube-remove.sh` does aggressive cleanup (iptables flush, process kill, apt purge) — safe to run repeatedly.
 - `console.sh` drops into interactive bash within the menu (`exit` to return).
-- Controller machine not part of cluster: `init-self.sh` downloads `kubectl` binary and copies kubeconfig from first master.
+- Controller machine can be the first master (if `masters=localhost`) or a separate machine: `init-self.sh` downloads `kubectl` binary and copies kubeconfig from first master.
+- `install-kubeadm.sh` now installs containerd if not already present (fix for bare Ubuntu systems without Docker history).
 
 ## Change log
 All changes made during the 2026 revival are tracked in [`CHANGES.md`](./CHANGES.md).
@@ -63,20 +65,38 @@ The project now works on a single node with all three LB types:
 - `cleanup-all.sh` for full nuclear teardown (also removes envoy's manually-installed systemd unit)
 - Deterministic menu ordering, no shared temp files, proper `sudo tee -a` redirection
 
-### 🔜 Milestone 2: Multi-node provisioning (next)
-All script-level bugs that block multi-node have been fixed:
+### ✅ Milestone 2: Multi-node provisioning (complete)
+Multi-node cluster deployed and verified with two physical hosts:
 
-| Area | Status | Detail |
-|------|--------|--------|
-| `prepare-cluster-join.sh` | ✅ | Rewritten: awk-based join command extraction handles `\` continuation lines, correctly differentiates worker vs control-plane by `--control-plane` flag |
-| `haproxy/start-haproxy.sh` | ✅ | Remote sysctl redirect fixed: `>>/etc/sysctl.conf` now runs on remote host via `sudo tee -a` |
-| `copy-kube-config.sh` | ✅ | Remote `$HOME/.bashrc` sed/echo redirects fixed: all commands quoted and use `~/.bashrc` |
-| `launch-cluster.sh:63` | ✅ | sed delimiter `/` → `\|` to avoid CIDR collision (`10.244.0.0/16`) |
-| Remote execution pattern | ✅ | All 3 scripts with `>>` redirect bugs resolved |
-| **Remaining** | ⏳ | Needs a second physical host to test: remote join, cert copy, worker/control-plane join flow, cleanup-all.sh remote iteration |
-| **Tests** | ⏳ | `tests/test.sh` runs `launch-cluster.sh` in a loop with random LB types — needs real multi-node env |
+| Host | Role | OS | IP | Kubernetes |
+|------|------|----|----|------------|
+| vm | Control-plane + LB | Debian 13.5 (trixie) | 10.160.0.7 | v1.36.2, containerd v2.2.5 |
+| box | Worker | Ubuntu 22.04.5 (jammy) | 10.160.0.8 | v1.36.2, containerd v2.2.1 |
+
+**Tested**: haproxy LB → kubeadm init → worker join → Calico CNI on all nodes → nginx deployment.
+**Remaining issue**: All nginx pods landed on control-plane (vm). Worker node needs pods scheduled to it for cross-node networking test.
+
+**Fix discovered**: `install-kubeadm.sh` needed containerd installation on fresh Ubuntu systems.
+
+### ✅ Milestone 3: Cross-node pod networking (complete)
+Cross-node pod communication verified in both directions using Calico VXLAN:
+- Default Calico uses IPIP (`ipipMode: Always`) but IPIP is blocked by most clouds.
+- `install-cni-pluggin.sh` now modifies the manifest to use VXLAN before applying:
+  `CALICO_IPV4POOL_IPIP`: `"Always"` → `"Never"`
+  `CALICO_IPV4POOL_VXLAN`: `"Never"` → `"Always"`
+- VXLAN tunnel (`vxlan.calico`) routes show bidirectional pod traffic between nodes.
+- `launch-cluster.sh` full automated pipeline validated end-to-end from scratch.
+
+### ✅ Milestone 4: Multi-node test automation (complete)
+- `tests/e2e-multi-node.sh` automates the full cycle: build → cross-node pod networking test → teardown.
+- Verified: passes 1/1 iteration (build, bidirectional HTTP, cleanup).
+
+### 🔜 Milestone 5: Multi-master HA (next)
+- Set up a second control-plane node (HA masters).
+- Update `tests/test.sh` to run `cleanup-all.sh` between iterations.
 
 Pre-requisites for multi-node testing:
 - Controller SSH key in `~/.ssh/authorized_keys` on every remote node
 - Root/sudo access on all remote nodes
 - Network connectivity between all nodes
+- Consistent username across all nodes

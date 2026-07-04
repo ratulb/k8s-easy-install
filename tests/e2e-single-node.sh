@@ -1,5 +1,24 @@
 #!/usr/bin/env bash
-# End-to-end test: single-node cluster with localhost LB.
+# End-to-end single-node test.
+#
+# Intent:
+#   Validate the full install pipeline on a single node (controller
+#   and workload on the same machine). Covers all three load balancer
+#   types. This is the simplest/fastest test for basic regression.
+#
+# How it works:
+#   1. Writes a single-node setup.conf (masters=localhost, no workers).
+#   2. Sources each install script step-by-step in order:
+#      LB install/configure/start -> kube-remove -> install-kubeadm ->
+#      kubeadm-init -> prepare-cluster-join -> install-cni-pluggin ->
+#      init-self -> test-commands -> clean-trash.
+#   3. Each step runs via `bash -c ". script.sh"` to isolate sourced
+#      scripts and prevent exit-code leaks between steps.
+#   4. On failure the step function prints the error and exits.
+#   5. Prints node status and pods on success.
+#   6. The lb_type argument selects which LB to test (default: envoy).
+#   7. Does NOT tear down — the cluster is left running for inspection.
+#
 # Usage: bash tests/e2e-single-node.sh [lb_type]
 #   lb_type: envoy (default), nginx, haproxy
 # Must be run from project root; user must have passwordless sudo.
@@ -13,7 +32,7 @@ lb_type="${1:-envoy}"
 cat > setup.conf <<CONF
 workers=
 masters=localhost
-pod_network_cidr=
+pod_network_cidr=192.168.0.0/16
 loadbalancer=localhost
 lb_type=$lb_type
 lb_port=6643

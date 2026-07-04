@@ -1,6 +1,19 @@
 #!/usr/bin/env bash
-. utils.sh
-#Commands for testing the cluster setup
+# Post-install smoke test — run by launch-cluster.sh after the cluster is built.
+#
+# Intent:
+#   Verify the cluster is functional immediately after install. Sourced
+#   by launch-cluster.sh (line 142) and by e2e-single-node.sh (step 8).
+#
+# How it works:
+#   1. Waits up to 10s for all nodes to become Ready.
+#   2. Removes the control-plane taint so workloads can schedule there.
+#   3. Deploys a 3-replica nginx deployment from a remote manifest.
+#   4. Waits up to 10s for all nginx pods to reach Running status.
+#   5. Cleans up the status-report temp file.
+#
+# Note: this script does NOT test cross-node networking. It's a basic
+# smoke test — if the API server is up and pods can run, it passes.
 
 prnt "checking cluster nodes status"
 rm -f status-report
