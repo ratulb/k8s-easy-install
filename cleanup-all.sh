@@ -24,6 +24,8 @@ cleanup_lb_local() {
     envoy)
       sudo rm -f /etc/apt/sources.list.d/envoy.list
       sudo rm -f /etc/apt/keyrings/envoy-keyring.gpg
+      sudo rm -f /etc/systemd/system/envoy.service
+      sudo systemctl daemon-reload
       ;;
   esac
 }
@@ -44,6 +46,8 @@ if [ -n "${lb_type:-}" ] && [ -n "${loadbalancer:-}" ]; then
       envoy)
         remote_cmd "$loadbalancer" sudo rm -f /etc/apt/sources.list.d/envoy.list
         remote_cmd "$loadbalancer" sudo rm -f /etc/apt/keyrings/envoy-keyring.gpg
+        remote_cmd "$loadbalancer" sudo rm -f /etc/systemd/system/envoy.service
+        remote_cmd "$loadbalancer" sudo systemctl daemon-reload
         ;;
     esac
     remote_cmd "$loadbalancer" sudo rm -rf "/etc/$lb_type"

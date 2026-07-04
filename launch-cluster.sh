@@ -60,7 +60,7 @@ echo ""
 cp kubeadm-init.sh kubeadm-init.sh.tmp
 sed -i "s/#masters#/'$masters'/g" kubeadm-init.sh.tmp
 sed -i "s/#lb_port#/$lb_port/g" kubeadm-init.sh.tmp
-sed -i "s/#pod_network_cidr#/$pod_network_cidr/g" kubeadm-init.sh.tmp
+sed -i "s|#pod_network_cidr#|$pod_network_cidr|g" kubeadm-init.sh.tmp
 sed -i "s/#loadbalancer#/$loadbalancer/g" kubeadm-init.sh.tmp
 if [ ! -z "$loadbalancer" ]; then
   case $lb_type in
@@ -106,7 +106,7 @@ for _master in $masters; do
       remote_script $_master kubeadm-init.sh.tmp
       . copy-init-log.sh $_master
       . prepare-cluster-join.sh
-      prnt "Installing weave cni pluggin"
+      prnt "Installing Calico CNI"
       remote_script $_master install-cni-pluggin.sh
     else
       remote_script $_master master-join-cluster.cmd

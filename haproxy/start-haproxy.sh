@@ -6,7 +6,7 @@
 prnt "Starting haproxy on $loadbalancer"
 if ! is_address_local $loadbalancer; then
   remote_cmd $loadbalancer sed -i '/net.ipv4.ip_nonlocal_bind/d' /etc/sysctl.conf
-  remote_cmd $loadbalancer echo 'net.ipv4.ip_nonlocal_bind=1' >>/etc/sysctl.conf
+  remote_cmd $loadbalancer "echo 'net.ipv4.ip_nonlocal_bind=1' | sudo tee -a /etc/sysctl.conf > /dev/null"
   remote_cmd $loadbalancer sysctl -p
   remote_cmd $loadbalancer systemctl daemon-reload
   remote_cmd $loadbalancer systemctl enable haproxy

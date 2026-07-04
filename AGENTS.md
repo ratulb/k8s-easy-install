@@ -46,33 +46,36 @@
 - `utils.sh` must be sourced with `. utils.sh` (not `source utils.sh` — but both work in bash). Scripts use `.` form.
 - `kubeadm-init.sh` is copied to `kubeadm-init.sh.tmp` then placeholders replaced with sed. The `.tmp` file is sourced as a script (not executed).
 - `$debug` env var suppresses temp file cleanup and enables debug print via `debug()`.
-- Weave CNI is hardcoded in `install-cni-pluggin.sh` — no flannel/calico option.
 - `kube-remove.sh` does aggressive cleanup (iptables flush, process kill, apt purge) — safe to run repeatedly.
 - `console.sh` drops into interactive bash within the menu (`exit` to return).
 - Controller machine not part of cluster: `init-self.sh` downloads `kubectl` binary and copies kubeconfig from first master.
 
 ## Change log
-Changes made during the 2026 revival are tracked in [`CHANGES.md`](./CHANGES.md).
+All changes made during the 2026 revival are tracked in [`CHANGES.md`](./CHANGES.md).
 
-## Stale / needs update (revival project)
+## Milestone status
 
-This project has not been maintained in years. The following items have been fixed to target v1.36 on modern OS:
-- ✅ **`install-kubeadm.sh`** — updated to `pkgs.k8s.io` repo (v1.36), gpg `signed-by` format, containerd CRI config with `SystemdCgroup`, module loading, removes Docker if present.
-- ✅ **`install-cni-pluggin.sh`** — replaced Weave (archived) with Calico v3.32.1.
-- ✅ **`install-docker.sh`** — no-op; Docker is unused (containerd is the runtime).
-- ✅ **`install-kubeadm.sh`** now includes containerd config reset, so Docker-hostile containerd configs (`disabled_plugins = ["cri"]`) are fixed.
-- ✅ **`envoy/install-envoy.script`** — uses official `apt.envoyproxy.io` repo with `signed-by` key, distro codename fallback mapping.
-- ✅ **`kube-remove.sh`** — added containerd reset (stop, rm data, regenerate config, `SystemdCgroup`, restart).
-- ✅ **`test-commands.sh`** — taint label → `node-role.kubernetes.io/control-plane`, role grep → `control-plane`.
-- ✅ **`envoy/envoy-template-2.yaml`** — fixed `v2alpha.FixedHeapConfig` → `v3.FixedHeapConfig` (validated with envoy 1.32.2).
-- ✅ **`nginx/install-nginx.sh`** — switched from Debian apt to official `nginx.org` repo with `signed-by` key, distro fallback mapping.
-- ✅ **`kube-remove.sh`** — fixed `iptables` PATH, `--allow-change-held-packages`, `pgrep -f`.
-- ✅ **`tests/e2e-single-node.sh`** — rewritten with per-step `bash -c` isolation and `step()` error handler.
-- ✅ **`envoy/envoy-template-2.yaml`** — `access_log_path`→`access_log` list format (fixes non-root Permission denied).
-- ✅ **`utils.sh`** — `is_address_local()` line-break bug fixed; all 12 LB call sites updated.
-- ✅ **`nginx/configure-nginx.sh`** — fixed `mv` permission denied (no sudo), fixed backends indentation.
-- ✅ **`haproxy/configure-haproxy.sh`** — fixed `mv` permission denied (no sudo).
-- ✅ **`haproxy/start-haproxy.sh`** — fixed `sudo echo >>` (redirection not root) → `sudo tee -a`.
-- ✅ **All three LBs verified** — envoy, nginx, and haproxy each pass end-to-end single-node test.
-- ✅ **`kube-remove.sh`** — expanded: removes k8s apt repo, keyring, pin, sysctl, modules-load configs; `/etc/cni/net.d`→`/etc/cni`.
-- ✅ **`cleanup-all.sh`** — new full-teardown script: stops/purges all LBs, removes LB repos/keyrings, runs kube-remove.sh + clean-trash.sh.
+### ✅ Milestone 1: Single-node revival (complete)
+The project now works on a single node with all three LB types:
+- Kubernetes v1.36.2 from `pkgs.k8s.io`, Calico CNI v3.32.1, containerd CRI
+- Three LBs (haproxy, nginx, envoy) each verified end-to-end
+- `cleanup-all.sh` for full nuclear teardown
+- Deterministic menu ordering, no shared temp files, proper `sudo tee -a` redirection
+
+### 🔜 Milestone 2: Multi-node provisioning (next)
+All script-level bugs that block multi-node have been fixed:
+
+| Area | Status | Detail |
+|------|--------|--------|
+| `prepare-cluster-join.sh` | ✅ | Rewritten: awk-based join command extraction handles `\` continuation lines, correctly differentiates worker vs control-plane by `--control-plane` flag |
+| `haproxy/start-haproxy.sh` | ✅ | Remote sysctl redirect fixed: `>>/etc/sysctl.conf` now runs on remote host via `sudo tee -a` |
+| `copy-kube-config.sh` | ✅ | Remote `$HOME/.bashrc` sed/echo redirects fixed: all commands quoted and use `~/.bashrc` |
+| `launch-cluster.sh:63` | ✅ | sed delimiter `/` → `\|` to avoid CIDR collision (`10.244.0.0/16`) |
+| Remote execution pattern | ✅ | All 3 scripts with `>>` redirect bugs resolved |
+| **Remaining** | ⏳ | Needs a second physical host to test: remote join, cert copy, worker/control-plane join flow, cleanup-all.sh remote iteration |
+| **Tests** | ⏳ | `tests/test.sh` runs `launch-cluster.sh` in a loop with random LB types — needs real multi-node env |
+
+Pre-requisites for multi-node testing:
+- Controller SSH key in `~/.ssh/authorized_keys` on every remote node
+- Root/sudo access on all remote nodes
+- Network connectivity between all nodes

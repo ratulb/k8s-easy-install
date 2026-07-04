@@ -106,6 +106,51 @@ Tracking updates made during the 2026 revival of k8s-easy-install.
 - Falls back to scanning all three LBs if no LB is configured in `setup.conf`.
 - Prints reminder to run `kube-remove.sh` on each remote worker/master.
 
+### `cluster.sh` — deterministic menu ordering
+- Replaced `declare -A` associative array (non-deterministic, varies by bash version) with indexed array `menu_items`.
+- Menu items fixed: 1) Cluster setup, 2) Kubelet status, 3) System pod status, 4) LB status, 5) Console, 6) !! Full cleanup, 7) Refresh, 8) Quit.
+
+### `envoy/configure-envoy.sh`, `haproxy/configure-haproxy.sh` — removed shared temp file
+- `/tmp/backends.txt` was shared between envoy and haproxy config scripts; saved from one run could corrupt the other.
+- Both now build backend strings in-memory via variable and append directly to draft file.
+
+## P5 — Multi-node bug fixes (done)
+
+### `prepare-cluster-join.sh` — rewritten (P0)
+- Old code used `tail -2` which captured the wrong lines and prepended `sudo` to the prompt text.
+- New code: uses `awk` to reassemble continuation lines (kubeadm outputs multi-line commands with `\` continuations), then differentiates worker vs control-plane by `--control-plane` flag.
+- Handles missing log file, missing join commands, and missing `--control-plane` (single-master without `--upload-certs`).
+
+### `haproxy/start-haproxy.sh` — remote sysctl redirect (P0)
+- `remote_cmd $lb echo '...' >>/etc/sysctl.conf` — the `>>` redirect runs on the controller, not the remote LB.
+- Fixed: `remote_cmd $lb "echo '...' | sudo tee -a /etc/sysctl.conf"`.
+
+### `copy-kube-config.sh` — remote sed/echo redirects (P0)
+- Two bugs: `$HOME/.bashrc` expanded on controller (wrong path on remote), and `>>` redirect ran on controller.
+- Fixed: use `~/.bashrc` inside quoted remote command strings for both the `sed -i` removal and the `echo` append.
+
+### `launch-cluster.sh`, `e2e-single-node.sh` — sed delimiter collision (P0)
+- `s/#pod_network_cidr#/$pod_network_cidr/g` used `/` delimiter, but CIDR value contains `/` (e.g., `10.244.0.0/16`).
+- Fixed: use `|` as sed delimiter: `s|#pod_network_cidr#|$pod_network_cidr|g`.
+
+### `tests/test.sh` — invalid sed flag (P1)
+- `s/lb_type=.*/lb_type=$_lb/go` — `/go` is not a valid sed flag combination.
+- Fixed: removed spurious `/go` flags.
+
+### `system-pod-status.sh` — broken while-condition (P1)
+- `while [ "$i" ] >0 && [[ ! "$status" = "Running" ]]` — `>0` creates a file named `0` instead of comparing.
+- Fixed: `while [[ "$i" -gt 0 && "$status" != "Running" ]]`.
+
+### `nginx-deployment.yaml` — stale taint key (P1)
+- `node-role.kubernetes.io/master` → `node-role.kubernetes.io/control-plane`.
+
+### `utils.sh` — duplicate code in `configure_multi_master_setup()` (P1)
+- The LB config sed block (lines 290-296) was an exact duplicate of lines 272-278. Removed.
+
+### `launch-cluster.sh` — stale "weave" print (P1)
+- `prnt "Installing weave cni pluggin"` → `prnt "Installing Calico CNI"`.
+
 ### Verification
 - All three LB types (envoy, nginx, haproxy) tested end-to-end on single-node cluster.
 - Each passes: LB install → kubeadm init → Calico CNI → nginx demo deployment.
+- `prepare-cluster-join.sh` verified with mock kubeadm-init.log (multi-line join commands with `\` continuations).

@@ -287,14 +287,6 @@ configure_multi_master_setup() {
   else
     sed -i "s/workers=.*/workers=/g" setup.conf
   fi
-  [[ ! -z "$_lb_addr_" ]] && [[ ! -z "$_lb_port_" ]] && [[ ! -z "$_lb_type_" ]] && all_specified=yes
-  [[ -z "$_lb_addr_" ]] && [[ -z "$_lb_port_" ]] && [[ -z "$_lb_type_" ]] && none_specified=yes
-  if [[ "$all_specified" = "yes" ]] || [[ "$none_specified" = "yes" ]]; then
-    sed -i "s/master=.*/master=/g" setup.conf
-    sed -i "s/loadbalancer=.*/loadbalancer=$_lb_addr_/g" setup.conf
-    sed -i "s/lb_port=.*/lb_port=$_lb_port_/g" setup.conf
-    sed -i "s/lb_type=.*/lb_type=$_lb_type_/g" setup.conf
-  fi
 }
 
 #Launch busybox container called debug

@@ -26,7 +26,7 @@ CONF
 cp kubeadm-init.sh kubeadm-init.sh.tmp
 sed -i "s/#masters#/'$masters'/g" kubeadm-init.sh.tmp
 sed -i "s/#lb_port#/$lb_port/g" kubeadm-init.sh.tmp
-sed -i "s/#pod_network_cidr#/$pod_network_cidr/g" kubeadm-init.sh.tmp
+sed -i "s|#pod_network_cidr#|$pod_network_cidr|g" kubeadm-init.sh.tmp
 sed -i "s/#loadbalancer#/$loadbalancer/g" kubeadm-init.sh.tmp
 
 echo ""

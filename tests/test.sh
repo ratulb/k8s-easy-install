@@ -16,7 +16,7 @@ while [[ $count -lt $run_count ]]; do
   else
     _lb=nginx
   fi
-  sed -i "s/lb_type=.*/lb_type=$_lb/go" setup.conf
+  sed -i "s/lb_type=.*/lb_type=$_lb/" setup.conf
   prnt "lb is: $_lb"
   echo "lb is: $_lb" >>tests/test-result.txt
 
