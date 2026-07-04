@@ -2,6 +2,8 @@
 
 **Spin up a production-style Kubernetes cluster from one machine — no Ansible, no clicking around in cloud consoles, no logging into each node individually. All just from a shell-menu**
 
+![cluster_setup.png](cluster_setup.png)
+
 | What | Value |
 |---|---|
 | Nodes | Single-node or multi-node (control-plane + workers) |
