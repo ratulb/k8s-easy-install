@@ -10,7 +10,15 @@ if ! [[ "$cluster_members" = *"$this_host_name"* ]] && ! [[ "$cluster_members" =
   sudo mv ./kubectl /usr/local/bin/kubectl
 fi
 
-if [[ "$masters" =~ "$this_host_name" ]] || [[ "$masters" =~ "$this_host_ip" ]]; then
+local_master=false
+for _m in $masters; do
+  if is_address_local $_m; then
+    local_master=true
+    break
+  fi
+done
+
+if $local_master; then
   sudo cp /etc/kubernetes/admin.conf ~/.kube/config
 else
   master_1=$(echo $masters | cut -d' ' -f1)
