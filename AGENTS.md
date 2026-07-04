@@ -48,3 +48,14 @@
 - `kube-remove.sh` does aggressive cleanup (iptables flush, process kill, apt purge) — safe to run repeatedly.
 - `console.sh` drops into interactive bash within the menu (`exit` to return).
 - Controller machine not part of cluster: `init-self.sh` downloads `kubectl` binary and copies kubeconfig from first master.
+
+## Stale / needs update (revival project)
+
+This project has not been maintained in years. Everything is stale — Kubernetes, load balancers, Weave CNI — and will likely fail on modern OS releases. When reviving:
+- **`kubeadm-init.sh`** — `--token-ttl 0` is deprecated; kubeadm now generates non-expiring tokens by default. `--upload-certs` flag may need verification.
+- **`install-kubeadm.sh`** — uses the old `apt.kubernetes.io` repo (moved to `pkgs.k8s.io`). Keyring format has changed.
+- **`install-docker.sh`** — Docker no longer uses apt-key; add-apt-repository URLs are years out of date (Ubuntu eoan references).
+- **`install-cni-pluggin.sh`** — Weave has been archived upstream. Replace with Cilium, Calico, or Flannel.
+- **`envoy/`** — `.install-envoy.script` references very old envoy version.
+- **`kube-remove.sh`** — `kubeadm reset --force` + apt purge still works but may need `containerd` reset step.
+- **Kubernetes itself** — tested on v1.19–1.23 era. kubeadm config is the legacy v1beta2 API.
