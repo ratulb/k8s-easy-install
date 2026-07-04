@@ -1,6 +1,6 @@
 # k8s-easy-install
 
-**Spin up a production-style Kubernetes cluster from one machine — no Ansible, no clicking around in cloud consoles, no logging into each node individually.**
+**Spin up a production-style Kubernetes cluster from one machine — no Ansible, no clicking around in cloud consoles, no logging into each node individually. All just from a shell-menu**
 
 | What | Value |
 |---|---|
@@ -25,7 +25,7 @@ sudo ./cluster.sh
 <details>
 <summary><b>Single-node cluster (all on one machine)</b></summary>
 
-1. **Loadbalancer** — enter `localhost:6643` (port must **not** be 6443).
+1. **Loadbalancer** — enter `localhost:9999` (port must **not** be 6443).
 2. Choose a load balancer type (`haproxy` / `nginx` / `envoy`).
 3. **Master nodes** — enter the local machine's IP or hostname, then a blank line.
 4. **Worker nodes** — press Enter (blank line) to skip.
