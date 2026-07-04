@@ -2,14 +2,14 @@
 
 . utils.sh
 
-rm -f /tmp/backends.txt
-touch /tmp/backends.txt
+backends=""
 for _master in $masters; do
-  echo "        - endpoint:">>/tmp/backends.txt
-  echo "            address:" >>/tmp/backends.txt
-  echo "              socket_address:" >>/tmp/backends.txt
-  echo "                address: $_master" >>/tmp/backends.txt
-  echo "                port_value: 6443" >>/tmp/backends.txt
+  backends="${backends}        - endpoint:
+            address:
+              socket_address:
+                address: $_master
+                port_value: 6443
+"
 done
 
 first_entry=$(echo $masters | cut -d' ' -f1)
@@ -21,10 +21,10 @@ else
 fi
 sed -i "s/#lb_port#/$lb_port/g" envoy.draft
 
-cat /tmp/backends.txt >> envoy.draft
+echo "$backends" >> envoy.draft
 cat envoy/envoy-template-2.yaml >> envoy.draft
 
-if [[ "$this_host_ip" = "$loadbalancer" ]] || [[ "$this_host_name" = "$loadbalancer" ]]; then
+if is_address_local $loadbalancer; then
   sudo mkdir -p /etc/envoy
   sudo cp envoy.draft /etc/envoy/envoy.yaml
   sudo cp envoy/envoy.service /etc/systemd/system/

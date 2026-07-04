@@ -77,9 +77,7 @@ is_port_valid() {
 
 is_address_local() {
   local addr=$1
-  if [[ "$addr" = $this_host_ip ]] || [[ "$addr" = "$this_host_name" ]] || [[ "$addr" = "127.0.0.1" ]] || [[ "$
-ad
-dr" = "localhost" ]]; then
+  if [[ "$addr" = $this_host_ip ]] || [[ "$addr" = "$this_host_name" ]] || [[ "$addr" = "127.0.0.1" ]] || [[ "$addr" = "localhost" ]]; then
     return 0
   else
     return 1

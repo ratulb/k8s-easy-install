@@ -3,32 +3,42 @@
 clear
 echo ""
 prnt "kubernetes cluster setup"
-declare -A setupActions
-setupActions+=(['Quit']='quit')
-setupActions+=(['Cluster setup']='cluster-setup')
-setupActions+=(['Console']='console')
-setupActions+=(['Kubelet status']='kubelet-status')
-setupActions+=(['System pod status']='system-pod-status')
-setupActions+=(['Load balancer status']='lb-status')
-setupActions+=(['Refresh view']='refresh-view')
+menu_items=(
+  'Cluster setup'
+  'Kubelet status'
+  'System pod status'
+  'Load balancer status'
+  'Console'
+  '!! Full cleanup'
+  'Refresh view'
+  'Quit'
+)
 echo ""
 re="^[0-9]+$"
 PS3=$'\e[92mSelection: \e[0m'
-select option in "${!setupActions[@]}"; do
+select option in "${menu_items[@]}"; do
 
-  if ! [[ "$REPLY" =~ $re ]] || [ "$REPLY" -gt 7 -o "$REPLY" -lt 1 ]; then
+  if ! [[ "$REPLY" =~ $re ]] || [ "$REPLY" -gt ${#menu_items[@]} -o "$REPLY" -lt 1 ]; then
     err "Invalid selection!"
   else
-    case "${setupActions[$option]}" in
-      system-pod-status)
+    case "$option" in
+      'System pod status')
         . system-pod-status.sh
         ;;
 
-      console)
+      'Console')
         ./console.sh
         ;;
 
-      cluster-setup)
+      'Kubelet status')
+        . kubelet-status.sh
+        ;;
+
+      'Load balancer status')
+        . lb-status.sh
+        ;;
+
+      'Cluster setup')
         echo ""
         PS3=$'\e[92mMulti-master setup: \e[0m'
         multi_master_options=('Loadbalancer' 'Back' 'Launch' 'Master nodes' 'Worker nodes' 'Reset configuration')
@@ -344,7 +354,19 @@ select option in "${!setupActions[@]}"; do
           fi
         done
         ;;
-      refresh-view)
+      '!! Full cleanup')
+        echo ""
+        err "!!! DANGER: This will destroy the entire cluster and remove all traces !!!"
+        err "    Load balancer, Kubernetes, apt repos, keyrings, and data will be purged."
+        echo ""
+        . confirm-action.sh "Proceed with full cleanup" "Cancelled full cleanup"
+        if [ "$?" -eq 0 ]; then
+          . cleanup-all.sh
+        fi
+        echo ""
+        ;;
+
+      'Refresh view')
         if [ "$0" = "-su" ]; then
           script="./cluster.sh"
         else
@@ -352,7 +374,7 @@ select option in "${!setupActions[@]}"; do
         fi
         exec "$script"
         ;;
-      quit)
+      'Quit')
         prnt "quit"
         rm -f /tmp/selected_lb_type.txt
         rm -f /tmp/lb_addr_and_port.txt

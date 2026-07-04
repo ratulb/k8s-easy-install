@@ -1,5 +1,3 @@
-#We are installing weave pluggin here
-kubectl apply -f \
-    "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl \
-    version | base64 | tr -d '\n')"
-
+#!/usr/bin/env bash
+# Install Calico CNI (replaces Weave, which has been archived upstream)
+kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.32.1/manifests/calico.yaml

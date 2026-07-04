@@ -13,7 +13,7 @@ Controller ──SSH──► Loadbalancer (haproxy/nginx/envoy)
 
 - **root / sudo** access on the controller machine.
 - **SSH public key** of the controller machine in `~/.ssh/authorized_keys` of every remote cluster node.
-- Verified on Debian Buster and Ubuntu 16.04/18.04/20.04.
+- Verified on Debian 11/12/13 and Ubuntu 20.04/22.04/24.04.
 
 ## Quick start
 
@@ -59,7 +59,7 @@ Follow the interactive menu:
   3. For every master:
        kube-remove.sh → install-kubeadm.sh
   4. First master only:
-       kubeadm init (from template) → extract join commands → Weave CNI
+        kubeadm init (from template) → extract join commands → Calico CNI
   5. Remaining masters:
        master-join-cluster.cmd
   6. Workers:
@@ -109,10 +109,10 @@ The join commands for additional masters and workers are extracted from the firs
 | `launch-cluster.sh` | Orchestrator | Controller |
 | `kube-remove.sh` | Nuke existing k8s installation | Each node |
 | `install-kubeadm.sh` | Install kubeadm/kubelet/kubectl via apt | Each node |
-| `install-docker.sh` | Docker CE (commented out in launch) | Each node |
+| `install-docker.sh` | No-op (containerd is the CRI runtime; Docker is removed if present) | Each node |
 | `kubeadm-init.sh` | Template for kubeadm init | First master |
 | `prepare-cluster-join.sh` | Extract join commands from kubeadm-init.log | Controller |
-| `install-cni-pluggin.sh` | Install Weave CNI | First master |
+| `install-cni-pluggin.sh` | Install Calico CNI | First master |
 | `init-self.sh` | Setup kubectl + kubeconfig on controller | Controller |
 | `test-commands.sh` | Post-install validation + demo nginx pod | Controller |
 | `clean-trash.sh` | Remove generated temp files | Controller |
@@ -140,7 +140,7 @@ remote_copy   <src> <dst>          # SCP with StrictHostKeyChecking=no
 |---|---|---|
 | haproxy | `/etc/haproxy/haproxy.cfg` — TCP mode `server` lines | systemd |
 | nginx | `/etc/nginx/nginx.conf` — `stream` block with `$masters` | systemd |
-| envoy | YAML templates → rendered config, run as systemd service | systemd |
+| envoy | YAML templates → rendered config, installed from official apt repo, run as systemd service | systemd |
 
 ### Runbook / menu index
 
@@ -171,8 +171,8 @@ Defaults to 20 iterations. Each iteration picks a random LB type, runs the full 
 
 ## Limitations
 
-- **CNI plugin** — Only Weave is supported (hardcoded in `install-cni-pluggin.sh`). There is no option for flannel, Calico, or Cilium. To swap, replace the contents of `install-cni-pluggin.sh` with a different `kubectl apply -f <cni-manifest>`.
-- **Docker** — The Docker install script (`install-docker.sh`) exists but is **commented out** in `launch-cluster.sh`. The project relies on containerd (bundled with kubeadm).
+- **CNI plugin** — Only Calico is supported (hardcoded in `install-cni-pluggin.sh`). There is no option for flannel, Weave, or Cilium. To swap, replace the contents of `install-cni-pluggin.sh` with a different `kubectl apply -f <cni-manifest>`.
+- **Docker** — Not used. If present on a node, `install-kubeadm.sh` removes it automatically and configures containerd as the CRI runtime.
 - **Controller not in cluster** — The controller machine itself is not joined as a node. `kubectl` is fetched as a standalone binary and configured via kubeconfig copied from the first master.
 
 ---
@@ -210,17 +210,17 @@ Loadbalancer address collides with ip $_ip yet loadbalancer port is 6443
 <details>
 <summary><b>Pods stuck in ContainerCreating / Pending</b></summary>
 
-1. **CNI not installed** — Verify Weave pods are running:
-   ```bash
-   kubectl -n kube-system get pods | grep weave
-   ```
+   1. **CNI not installed** — Verify Calico pods are running:
+      ```bash
+      kubectl -n kube-system get pods | grep calico
+      ```
 2. **Node not ready** — Check node status:
    ```bash
    kubectl get nodes
    ```
 3. **Taints** — The test script (`test-commands.sh`) removes the master taint for demo workloads. If you skip test-commands, you may need to taint manually:
    ```bash
-   kubectl taint nodes --all node-role.kubernetes.io/master-
+   kubectl taint nodes --all node-role.kubernetes.io/control-plane-
    ```
 
 </details>
@@ -245,7 +245,7 @@ Common causes:
 <summary><b>Node shows NotReady after join</b></summary>
 
 Allow time for the CNI plugin to deploy (~30 seconds). If it persists:
-- Check the CNI pod logs: `kubectl -n kube-system logs -l name=weave-net`
+- Check the CNI pod logs: `kubectl -n kube-system logs -l k8s-app=calico-node`
 - Verify pod CIDR doesn't overlap with the host network
 - If the first master's `--pod-network-cidr` was set, all nodes must use the same CIDR
 
@@ -275,6 +275,7 @@ This preserves:
 - Runs `kubeadm reset --force`
 - Removes `/etc/kubernetes/`, `~/.kube/`, `/var/lib/kubelet/`, `/var/lib/etcd`
 - Purges kubeadm/kubelet/kubectl packages
+- Resets containerd (stop, wipe data, regenerate config with `SystemdCgroup = true`, restart)
 - Flushes iptables rules and kills orphan apiserver/etcd processes
 
 Just re-launch from the menu and re-enter your configuration.

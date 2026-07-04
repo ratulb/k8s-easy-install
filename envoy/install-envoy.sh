@@ -3,7 +3,7 @@
 
 prnt "Installing kubemaster load balancer on $loadbalancer"
 
-if [ "$this_host_ip" = "$loadbalancer" ]; then
+if is_address_local $loadbalancer; then
   . envoy/install-envoy.script
 else
   remote_script $loadbalancer envoy/install-envoy.script

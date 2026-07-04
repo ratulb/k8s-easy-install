@@ -15,9 +15,9 @@ while [ "$i" -gt 0 ] && [[  $status =~ *"NotReady"* ]] ; do
   status=$(cat status-report | awk '{if(NR>1)print}' | awk '{print $3}' | sort -u | tr "\n" " " | xargs)
 done
 
-master_node=$(kubectl get nodes --no-headers | grep 'control-plane,master' | awk '{print $1}')
+master_node=$(kubectl get nodes --no-headers | grep control-plane | awk '{print $1}')
 
-kubectl taint nodes $master_node node-role.kubernetes.io/master-
+kubectl taint nodes $master_node node-role.kubernetes.io/control-plane-
 prnt "Deploying a demo nginx pod"
 
 kubectl apply -f https://raw.githubusercontent.com/ratulb/k8s-remote-install/main/nginx-deployment.yaml

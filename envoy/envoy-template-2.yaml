@@ -1,6 +1,10 @@
 
 admin:
-  access_log_path: "/tmp/admin_access.log"
+  access_log:
+  - name: envoy.access_loggers.file
+    typed_config:
+      "@type": type.googleapis.com/envoy.extensions.access_loggers.file.v3.FileAccessLog
+      path: /dev/null
   address:
     socket_address:
       address: 0.0.0.0
@@ -11,7 +15,7 @@ overload_manager:
   resource_monitors:
   - name: "envoy.resource_monitors.fixed_heap"
     typed_config:
-      "@type": type.googleapis.com/envoy.config.resource_monitor.fixed_heap.v2alpha.FixedHeapConfig
+      "@type": type.googleapis.com/envoy.extensions.resource_monitors.fixed_heap.v3.FixedHeapConfig
       #Tune for your system.
       max_heap_size_bytes: 2147483648 # 2 GiB
   actions:

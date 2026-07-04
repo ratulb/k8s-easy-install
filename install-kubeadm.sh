@@ -1,22 +1,53 @@
-#!/usr/bin/env bash 
+#!/usr/bin/env bash
 sudo apt update
+
+# Load kernel modules required by Kubernetes
+cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
+overlay
+br_netfilter
+EOF
+sudo modprobe overlay
+sudo modprobe br_netfilter
+
+# Set sysctl params required by Kubernetes
 cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
+net.ipv4.ip_forward = 1
 EOF
-sudo sed -i 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/g' /etc/sysctl.conf
 sudo sysctl --system
 
-sudo apt update && sudo apt install -y apt-transport-https curl
-curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
-cat <<EOF | sudo tee /etc/apt/sources.list.d/kubernetes.list
-deb https://apt.kubernetes.io/ kubernetes-xenial main
-EOF
-sudo apt update
-sudo apt install -y iptables
-sudo apt install -y kubeadm
+# Remove Docker if present (Kubernetes uses containerd directly)
+if command -v docker &>/dev/null; then
+  echo "Docker detected — removing in favour of containerd for Kubernetes"
+  sudo apt purge -y docker-ce docker-ce-cli docker-buildx-plugin docker-ce-rootless-extras docker-compose-plugin 2>/dev/null || true
+fi
 
+# Configure containerd for CRI
+sudo mkdir -p /etc/containerd
+sudo containerd config default | sudo tee /etc/containerd/config.toml > /dev/null
+sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
+sudo systemctl restart containerd
+
+# Add the new Kubernetes apt repository (pkgs.k8s.io)
+sudo apt install -y apt-transport-https ca-certificates curl gnupg
+sudo mkdir -p /etc/apt/keyrings
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.36/deb/Release.key \
+  | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.36/deb/ /' \
+  | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+# Pin pkgs.k8s.io so kubelet/kubeadm/kubectl come from the right repo
+cat <<'EOF' | sudo tee /etc/apt/preferences.d/kubernetes.pref > /dev/null
+Package: kubelet kubeadm kubectl
+Pin: origin pkgs.k8s.io
+Pin-Priority: 1001
+EOF
+
+sudo apt update
+sudo apt install -y --allow-downgrades kubelet kubeadm kubectl
+sudo apt-mark hold kubelet kubeadm kubectl
 sudo systemctl daemon-reload
 sudo systemctl restart kubelet
 
-echo "Kubeadm install has completed"
+echo "Kubeadm install has completed (Kubernetes v1.36)"
