@@ -57,9 +57,10 @@ All changes made during the 2026 revival are tracked in [`CHANGES.md`](./CHANGES
 
 ### ✅ Milestone 1: Single-node revival (complete)
 The project now works on a single node with all three LB types:
-- Kubernetes v1.36.2 from `pkgs.k8s.io`, Calico CNI v3.32.1, containerd CRI
-- Three LBs (haproxy, nginx, envoy) each verified end-to-end
-- `cleanup-all.sh` for full nuclear teardown
+- **Tested OS**: Debian 13.5 (trixie), kernel 6.12.94, x86_64
+- **Kubernetes**: v1.36.2 from `pkgs.k8s.io`, containerd v2.2.5 (CRI), Calico CNI v3.32.1
+- **Load balancers**: haproxy 3.0.11 (Debian apt), nginx 1.30.3 (nginx.org), envoy 1.32.2 (apt.envoyproxy.io)
+- `cleanup-all.sh` for full nuclear teardown (also removes envoy's manually-installed systemd unit)
 - Deterministic menu ordering, no shared temp files, proper `sudo tee -a` redirection
 
 ### 🔜 Milestone 2: Multi-node provisioning (next)
