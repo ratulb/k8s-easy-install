@@ -4,10 +4,14 @@
 
 backends=""
 for _master in $masters; do
+  _backend_host=$_master
+  if [[ "$_master" == "$loadbalancer" ]] || { is_address_local "$_master" && is_address_local "$loadbalancer"; }; then
+    _backend_host=127.0.0.1
+  fi
   backends="${backends}        - endpoint:
             address:
               socket_address:
-                address: $_master
+                address: $_backend_host
                 port_value: 6443
 "
 done

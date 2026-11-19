@@ -4,7 +4,11 @@
 
 backends=""
 for _master in $masters; do
-  backends="${backends}    server $_master:6443;
+  _backend_host=$_master
+  if [[ "$_master" == "$loadbalancer" ]] || { is_address_local "$_master" && is_address_local "$loadbalancer"; }; then
+    _backend_host=127.0.0.1
+  fi
+  backends="${backends}    server $_backend_host:6443;
 "
 done
 cat <<EOF | tee /tmp/nginx.config.snippet

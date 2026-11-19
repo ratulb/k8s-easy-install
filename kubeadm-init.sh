@@ -5,13 +5,17 @@ loadbalancer=#loadbalancer#
 lb_port=#lb_port#
 
 sudo systemctl restart kubelet
+_advertise_address=$(curl -s --max-time 3 https://api.ipify.org 2>/dev/null)
+if [ -z "$_advertise_address" ]; then
+  _advertise_address=$(hostname -I | awk '{print $1}')
+fi
 if [ -z "$loadbalancer" ]; then
-  sudo kubeadm init --token-ttl 0 | tee kubeadm-init.log
+  sudo kubeadm init --token-ttl 0 --apiserver-advertise-address $_advertise_address | tee kubeadm-init.log
 else
   if [ -z "$pod_network_cidr" ]; then
-    sudo kubeadm init --token-ttl 0 --control-plane-endpoint $loadbalancer:$lb_port --upload-certs | tee kubeadm-init.log
+    sudo kubeadm init --token-ttl 0 --control-plane-endpoint $loadbalancer:$lb_port --apiserver-advertise-address $_advertise_address --upload-certs | tee kubeadm-init.log
   else
-    sudo kubeadm init --token-ttl 0 --control-plane-endpoint $loadbalancer:$lb_port --pod-network-cidr $pod_network_cidr --upload-certs | tee kubeadm-init.log
+    sudo kubeadm init --token-ttl 0 --control-plane-endpoint $loadbalancer:$lb_port --apiserver-advertise-address $_advertise_address --pod-network-cidr $pod_network_cidr --upload-certs | tee kubeadm-init.log
   fi
 fi
 

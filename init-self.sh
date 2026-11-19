@@ -4,7 +4,7 @@
 cluster_members="$masters $workers"
 cluster_members=$(echo $cluster_members | xargs)
 
-if ! [[ "$cluster_members" = *"$this_host_name"* ]] && ! [[ "$cluster_members" = *"$this_host_ip"* ]]; then
+if ! [[ "$cluster_members" = *"$this_host_name"* ]] && ! [[ "$cluster_members" = *"$this_host_ip"* ]] && ! [[ "$cluster_members" = *"$this_host_public_ip"* ]]; then
   curl -sLO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
   chmod +x ./kubectl
   sudo mv ./kubectl /usr/local/bin/kubectl

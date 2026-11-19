@@ -50,7 +50,7 @@ select option in "${menu_items[@]}"; do
               'Loadbalancer')
                 unset lb_addr_and_port
                 rm -f /tmp/lb_addr_and_port.txt
-                prnt "Loadbalancer[$(hostname -i):6443](q - quit, p - proceed with default)"
+                prnt "Loadbalancer[${this_host_public_ip:-$(hostname -i)}:6443](q - quit, p - proceed with default)"
                 read -p 'Address and port: ' lb_addr_and_port
                 while [[ $lb_addr_and_port != 'q' ]] && [[ $lb_addr_and_port != 'p' ]] && ! lb_address_valid $lb_addr_and_port; do
                   read -p 'Address and port: ' lb_addr_and_port
@@ -68,7 +68,7 @@ select option in "${menu_items[@]}"; do
                   break
                 fi
                 if [ $lb_addr_and_port = 'p' ]; then
-                  lb_addr_and_port=$(hostname -i):6443
+                  lb_addr_and_port=${this_host_public_ip:-$(hostname -i)}:6443
                 fi
                 lb_address=$(echo $lb_addr_and_port | cut -d':' -f1)
                 rm -f /tmp/lb_addr_and_port.txt

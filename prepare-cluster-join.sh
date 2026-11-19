@@ -41,10 +41,10 @@ fi
 if [ -n "$loadbalancer" ]; then
   master_cmd=$(echo "$full_join_cmds" | grep -- '--control-plane' | head -1)
   if [ -n "$master_cmd" ]; then
-    {
-      echo "sleep ${sleep_time:-3}"
-      echo "sudo $master_cmd --ignore-preflight-errors=all -v=6 | tee /tmp/master-join-response"
-    } > master-join-cluster.cmd
+     {
+       echo "sleep ${sleep_time:-3}"
+       echo "sudo $master_cmd --apiserver-advertise-address \$(curl -s --max-time 3 https://api.ipify.org) --ignore-preflight-errors=all -v=6 | tee /tmp/master-join-response"
+     } > master-join-cluster.cmd
     chmod +x master-join-cluster.cmd
   fi
 fi

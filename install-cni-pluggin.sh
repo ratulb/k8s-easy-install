@@ -9,5 +9,12 @@ CALICO_MANIFEST_URL="https://raw.githubusercontent.com/projectcalico/calico/v3.3
 curl -sSL "$CALICO_MANIFEST_URL" -o /tmp/calico.yaml
 sed -i '/CALICO_IPV4POOL_IPIP/{n;s/value: "Always"/value: "Never"/}' /tmp/calico.yaml
 sed -i '/CALICO_IPV4POOL_VXLAN/{n;s/value: "Never"/value: "Always"/}' /tmp/calico.yaml
+# Use VXLAN backend (no BGP) — BGP (TCP 179) is problematic across NATed public IPs
+sed -i 's/calico_backend: "bird"/calico_backend: "vxlan"/' /tmp/calico.yaml
+# Remove bird-ready from readiness probe (BIRD not used in vxlan mode)
+sed -i 's#/bin/calico-node -felix-ready -bird-ready#/bin/calico-node -felix-ready#' /tmp/calico.yaml
 kubectl apply -f /tmp/calico.yaml
+# Use the Kubernetes node's InternalIP (public IP) for Calico node identity
+kubectl set env daemonset/calico-node -n kube-system IP_AUTODETECTION_METHOD=kubernetes-internal-ip 2>/dev/null || true
+kubectl delete pod -n kube-system -l k8s-app=calico-node --ignore-not-found=true 2>/dev/null || true
 rm -f /tmp/calico.yaml

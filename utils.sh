@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-export usr=$(whoami)
+export usr=${SUDO_USER:-$(whoami)}
 read_setup() {
   while IFS="=" read -r key value; do
     case "$key" in
@@ -18,6 +18,10 @@ read_setup() {
 
   export this_host_ip=$(echo $(hostname -i) | cut -d' ' -f1)
   export this_host_name=$(hostname)
+  # Discover this machine's public IP (best-effort; used when nodes are only reachable via public IPs)
+  if [[ -z "$this_host_public_ip" ]]; then
+    export this_host_public_ip=$(curl -s --max-time 3 https://api.ipify.org 2>/dev/null || curl -s --max-time 3 https://ifconfig.me 2>/dev/null)
+  fi
 }
 
 "read_setup"
@@ -77,11 +81,26 @@ is_port_valid() {
 
 is_address_local() {
   local addr=$1
-  if [[ "$addr" = $this_host_ip ]] || [[ "$addr" = "$this_host_name" ]] || [[ "$addr" = "127.0.0.1" ]] || [[ "$addr" = "localhost" ]]; then
+  if [[ "$addr" == "$this_host_ip" ]] || [[ "$addr" == "$this_host_name" ]] || [[ "$addr" == "127.0.0.1" ]] || [[ "$addr" == "localhost" ]]; then
     return 0
-  else
-    return 1
   fi
+  # Any IP currently assigned to this machine
+  for _lip in $(hostname -I 2>/dev/null); do
+    if [[ "$addr" == "$_lip" ]]; then
+      return 0
+    fi
+  done
+  # Public IP of this machine (when only reachable via public IPs / hairpin blocked)
+  if [[ -n "$this_host_public_ip" ]] && [[ "$addr" == "$this_host_public_ip" ]]; then
+    return 0
+  fi
+  # Fallback: SSH and compare hostname (covers public IPs not discovered above)
+  local _rhn
+  _rhn=$(remote_cmd "$addr" hostname 2>/dev/null)
+  if [[ "$_rhn" == "$this_host_name" ]]; then
+    return 0
+  fi
+  return 1
 }
 can_access_address() {
   local _addr=$1
@@ -155,18 +174,18 @@ validate_single_master_configuration() {
   local worker_ips=''
   local m_ip=''
   if is_address_local $_mstr_ip; then
-    m_ip=$(hostname -i)
+    m_ip=$(hostname)
   else
-    m_ip=$(quiet=yes remote_cmd $_mstr_ip hostname -i)
+    m_ip=$(quiet=yes remote_cmd $_mstr_ip hostname)
   fi
 
   debug "_mstr_ip $_mstr_ip, _workrs_ $_workrs_ and m_ip $m_ip"
   if [ ! -z "$_workrs_" ]; then
     for _w in $_workrs_; do
       if is_address_local $_w; then
-        worker_ips+="$(hostname -i) "
+        worker_ips+="$(hostname) "
       else
-        worker_ips+="$(quiet=yes remote_cmd $_w hostname -i) "
+        worker_ips+="$(quiet=yes remote_cmd $_w hostname) "
       fi
     done
     worker_ips=$(echo $worker_ips | xargs)
@@ -189,9 +208,9 @@ validate_multi-master-configuration() {
   if [ ! -z "$_workrs_" ]; then
     for _w in $_workrs_; do
       if is_address_local $_w; then
-        worker_ips+="$(hostname -i) "
+        worker_ips+="$(hostname) "
       else
-        worker_ips+="$(quiet=yes remote_cmd $_w hostname -i) "
+        worker_ips+="$(quiet=yes remote_cmd $_w hostname) "
       fi
     done
   fi
@@ -199,19 +218,19 @@ validate_multi-master-configuration() {
   master_ips=''
 
   for _m in $_mstrs_; do
-    if is_address_local $_m; then
-      master_ips+="$(hostname -i) "
-    else
-      master_ips+="$(quiet=yes remote_cmd $_m hostname -i) "
-    fi
+     if is_address_local $_m; then
+       master_ips+="$(hostname) "
+     else
+       master_ips+="$(quiet=yes remote_cmd $_m hostname) "
+     fi
   done
   master_ips=$(echo $master_ips | xargs)
   lb_ip=''
   if [ ! -z $_lb_addr ]; then
     if is_address_local $_lb_addr; then
-      lb_ip=$(hostname -i)
+      lb_ip=$(hostname)
     else
-      lb_ip=$(quiet=yes remote_cmd $_lb_addr hostname -i)
+      lb_ip=$(quiet=yes remote_cmd $_lb_addr hostname)
     fi
   fi
 
@@ -229,7 +248,7 @@ validate_multi-master-configuration() {
     m_and_w_ips="$master_ips $worker_ips"
     m_and_w_ips=$(echo $m_and_w_ips | xargs)
     for _ip in $m_and_w_ips; do
-      if [[ "$_ip" = "$_lb_addr" ]] && [[ "$_lb_port" -eq 6443 ]]; then
+      if [[ "$_ip" = "$lb_ip" ]] && [[ "$_lb_port" -eq 6443 ]]; then
         err "Loadbalancer address collides with ip $_ip yet loadbalancer port is 6443"
         return 1
       fi

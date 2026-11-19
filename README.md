@@ -106,7 +106,8 @@ The SSH user should be the same on the controller and all remote nodes. (If not,
 - All nodes must be able to reach each other on the ports used by Kubernetes and the LB.
 - The controller must be able to SSH into every node (ports 22, 6443, and the chosen LB port).
 - Workers need to reach the LB port and the control-plane.
-- Cloud firewalls / security groups must allow **VXLAN (UDP 4789)** traffic between nodes for pod networking (Calico uses VXLAN, not IPIP).
+- Cloud firewalls / security groups must allow **VXLAN (UDP 4789)** and **BGP (TCP 179)** traffic between nodes for pod networking and Calico control plane.
+- When nodes are in separate VNets with overlapping private IP ranges, use **public IPs** in the menu (private IPs collide).
 
 </details>
 
@@ -413,6 +414,22 @@ Pod A on the control-plane cannot reach pod B on the worker (or vice versa).
    # From the control-plane host, ping a pod on the worker
    ping -c 2 <worker-pod-ip>
    ```
+
+</details>
+
+<details>
+<summary><b>Nodes only reachable via public IPs (hairpin blocked)</b></summary>
+
+Cloud VMs often share the same private IP range across VNets, and hairpin (a node connecting to its own public IP) is blocked. The installer detects the local machine by its public IP/hostname (`is_address_local()`), so enter each node's **public IP** in the menu. Open the chosen LB port, 6443, UDP 4789 and TCP 179 in the cloud firewall.
+
+</details>
+
+<details>
+<summary><b>Calico nodes stuck NotReady — BGP not established</b></summary>
+
+Calico uses BGP (TCP 179) for its control plane even in VXLAN mode. If nodes cannot reach each other on TCP 179, `calico-node` reports `BIRD is not ready: BGP not established with ...` and nodes stay NotReady.
+
+Fix: open inbound **TCP 179** between all nodes' public IPs in your cloud firewall/NSG. VXLAN (UDP 4789) alone is not enough.
 
 </details>
 
