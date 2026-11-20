@@ -3,9 +3,9 @@
 prnt "Installing kube-apiserver nginx load balancer on $loadbalancer"
 
 install_nginx_from_official_repo() {
-  sudo apt update
-  sudo apt install -y curl ca-certificates gnupg
-  sudo apt autoremove -y
+  sudo DEBIAN_FRONTEND=noninteractive apt update
+  sudo DEBIAN_FRONTEND=noninteractive apt install -y curl ca-certificates gnupg
+  sudo DEBIAN_FRONTEND=noninteractive apt autoremove -y
 
   distro_codename=$(lsb_release -cs)
   case "$distro_codename" in
@@ -29,9 +29,9 @@ install_nginx_from_official_repo() {
   echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/debian $nginx_distro nginx" \
     | sudo tee /etc/apt/sources.list.d/nginx.list > /dev/null
 
-  sudo apt update
-  sudo apt install -y nginx
-  sudo apt autoremove -y
+  sudo DEBIAN_FRONTEND=noninteractive apt update
+  sudo DEBIAN_FRONTEND=noninteractive apt install -y nginx
+  sudo DEBIAN_FRONTEND=noninteractive apt autoremove -y
   prnt "nginx has been installed on $loadbalancer"
 }
 
@@ -65,9 +65,9 @@ else
       | sudo gpg --batch --yes --dearmor -o /etc/apt/keyrings/nginx-archive-keyring.gpg
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/nginx-archive-keyring.gpg] http://nginx.org/packages/debian $nginx_distro nginx" \
       | sudo tee /etc/apt/sources.list.d/nginx.list > /dev/null
-    sudo apt update
-    sudo apt install -y nginx
-    sudo apt autoremove -y
+    sudo DEBIAN_FRONTEND=noninteractive apt update
+    sudo DEBIAN_FRONTEND=noninteractive apt install -y nginx
+    sudo DEBIAN_FRONTEND=noninteractive apt autoremove -y
 SCRIPT
   prnt "nginx has been installed on $loadbalancer"
 fi

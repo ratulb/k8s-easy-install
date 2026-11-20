@@ -33,9 +33,12 @@ if is_address_local $loadbalancer; then
   sudo cp envoy.draft /etc/envoy/envoy.yaml
   sudo cp envoy/envoy.service /etc/systemd/system/
 else
-  remote_cmd $loadbalancer mkdir -p /etc/envoy
-  remote_copy envoy.draft $loadbalancer:/etc/envoy/envoy.yaml
-  remote_copy envoy/envoy.service $loadbalancer:/etc/systemd/system/
+  remote_copy envoy.draft $loadbalancer:/tmp/envoy.yaml.draft
+  remote_copy envoy/envoy.service $loadbalancer:/tmp/envoy.service.draft
+  remote_cmd $loadbalancer "sudo mkdir -p /etc/envoy"
+  remote_cmd $loadbalancer "sudo cp /tmp/envoy.yaml.draft /etc/envoy/envoy.yaml"
+  remote_cmd $loadbalancer "sudo cp /tmp/envoy.service.draft /etc/systemd/system/envoy.service"
+  remote_cmd $loadbalancer "rm -f /tmp/envoy.yaml.draft /tmp/envoy.service.draft"
 fi
 
 prnt "Configured envoy on $loadbalancer"

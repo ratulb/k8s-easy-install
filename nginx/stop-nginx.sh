@@ -2,10 +2,10 @@
 . utils.sh
 
 prnt "Stopping nginx on $loadbalancer"
-if ! is_address_local $loadbalancer; then	
-  remote_cmd $loadbalancer systemctl stop nginx &>/dev/null
-  remote_cmd $loadbalancer systemctl disable nginx &>/dev/null
-  remote_cmd $loadbalancer systemctl daemon-reload
+if ! is_address_local $loadbalancer; then
+  remote_cmd $loadbalancer "sudo systemctl stop nginx" &>/dev/null
+  remote_cmd $loadbalancer "sudo systemctl disable nginx" &>/dev/null
+  remote_cmd $loadbalancer "sudo systemctl daemon-reload"
 else
   sudo systemctl stop nginx &>/dev/null
   sudo systemctl disable nginx &>/dev/null

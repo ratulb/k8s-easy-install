@@ -34,7 +34,10 @@ if is_address_local $loadbalancer; then
   sudo cp haproxy.draft /etc/haproxy/haproxy.cfg
   rm -f haproxy.draft
 else
-  remote_copy haproxy.draft $loadbalancer:/etc/haproxy/haproxy.cfg
+  remote_copy haproxy.draft $loadbalancer:/tmp/haproxy.cfg.draft
+  remote_cmd $loadbalancer "sudo mkdir -p /etc/haproxy"
+  remote_cmd $loadbalancer "sudo cp /tmp/haproxy.cfg.draft /etc/haproxy/haproxy.cfg"
+  remote_cmd $loadbalancer "rm -f /tmp/haproxy.cfg.draft"
 fi
 
 prnt "Configured haproxy on $loadbalancer"

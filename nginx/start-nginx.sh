@@ -6,9 +6,9 @@
 
 prnt "Starting nginx on $loadbalancer"
 if ! is_address_local $loadbalancer; then
-  remote_cmd $loadbalancer systemctl daemon-reload
-  remote_cmd $loadbalancer systemctl enable nginx
-  remote_cmd $loadbalancer systemctl restart nginx
+  remote_cmd $loadbalancer "sudo systemctl daemon-reload"
+  remote_cmd $loadbalancer "sudo systemctl enable nginx"
+  remote_cmd $loadbalancer "sudo systemctl restart nginx"
 else
   sudo systemctl daemon-reload
   sudo systemctl enable nginx

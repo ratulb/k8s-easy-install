@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-sudo apt update
+export DEBIAN_FRONTEND=noninteractive
+sudo DEBIAN_FRONTEND=noninteractive apt update
 
 # Load kernel modules required by Kubernetes
 cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
@@ -20,12 +21,12 @@ sudo sysctl --system
 # Remove Docker if present (Kubernetes uses containerd directly)
 if command -v docker &>/dev/null; then
   echo "Docker detected — removing in favour of containerd for Kubernetes"
-  sudo apt purge -y docker-ce docker-ce-cli docker-buildx-plugin docker-ce-rootless-extras docker-compose-plugin 2>/dev/null || true
+  sudo DEBIAN_FRONTEND=noninteractive apt purge -y docker-ce docker-ce-cli docker-buildx-plugin docker-ce-rootless-extras docker-compose-plugin 2>/dev/null || true
 fi
 
 # Install containerd (CRI runtime)
 if ! command -v containerd &>/dev/null; then
-  sudo apt install -y containerd
+  sudo DEBIAN_FRONTEND=noninteractive apt install -y containerd
 fi
 
 # Configure containerd for CRI
@@ -36,7 +37,7 @@ sudo systemctl restart containerd
 sudo systemctl enable containerd
 
 # Add the new Kubernetes apt repository (pkgs.k8s.io)
-sudo apt install -y apt-transport-https ca-certificates curl gnupg
+sudo DEBIAN_FRONTEND=noninteractive apt install -y apt-transport-https ca-certificates curl gnupg
 sudo mkdir -p /etc/apt/keyrings
 curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.36/deb/Release.key \
   | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
@@ -50,8 +51,8 @@ Pin: origin pkgs.k8s.io
 Pin-Priority: 1001
 EOF
 
-sudo apt update
-sudo apt install -y --allow-downgrades kubelet kubeadm kubectl
+sudo DEBIAN_FRONTEND=noninteractive apt update
+sudo DEBIAN_FRONTEND=noninteractive apt install -y --allow-downgrades kubelet kubeadm kubectl
 sudo apt-mark hold kubelet kubeadm kubectl
 # Use this machine's public IP as the node IP (private IPs collide across VNets).
 # Add it to loopback so kubelet accepts it even when it is NATed (Azure).

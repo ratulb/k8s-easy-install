@@ -11,9 +11,11 @@ case $1 in
     source $HOME/.bashrc
     ;;
   to)
-    remote_cmd $2 mkdir -p $HOME/.kube
-    remote_copy $HOME/.kube/config $2:$HOME/.kube/config
-    remote_cmd $2 chown $(id -u):$(id -g) $HOME/.kube/config
+    remote_copy $HOME/.kube/config $2:/tmp/kubeconfig.tmp
+    remote_cmd $2 'mkdir -p $HOME/.kube'
+    remote_cmd $2 'cp /tmp/kubeconfig.tmp $HOME/.kube/config'
+    remote_cmd $2 'chown $(id -u):$(id -g) $HOME/.kube/config'
+    remote_cmd $2 'rm -f /tmp/kubeconfig.tmp'
     remote_cmd $2 "sed -i '/source <(kubectl completion bash)/d' ~/.bashrc"
     remote_cmd $2 "echo 'source <(kubectl completion bash)' >> ~/.bashrc"
     ;;
