@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 . utils.sh
 
+if [ -n "${SUDO_USER:-}" ]; then
+  controller_home=$(getent passwd "$SUDO_USER" | cut -d: -f6)
+else
+  controller_home="$HOME"
+fi
+[ -z "$controller_home" ] && controller_home="$HOME"
+mkdir -p "$controller_home/.kube"
+
 cluster_members="$masters $workers"
 cluster_members=$(echo $cluster_members | xargs)
 
@@ -19,14 +27,13 @@ for _m in $masters; do
 done
 
 if $local_master; then
-  sudo cp /etc/kubernetes/admin.conf ~/.kube/config
+  sudo cp /etc/kubernetes/admin.conf "$controller_home/.kube/config"
 else
   master_1=$(echo $masters | cut -d' ' -f1)
-  mkdir -p $HOME/.kube/
-  remote_copy $master_1:$HOME/.kube/config $HOME/.kube/config
+  remote_copy $master_1:~/.kube/config "$controller_home/.kube/config"
 fi
 
-chown $(id -u):$(id -g) ~/.kube/config
-sed -i '/source <(kubectl completion bash)/d' ~/.bashrc
-echo 'source <(kubectl completion bash)' >>~/.bashrc
-source ~/.bashrc
+chown "$usr:$usr" "$controller_home/.kube/config" 2>/dev/null || true
+chmod 600 "$controller_home/.kube/config" 2>/dev/null || true
+sed -i '/source <(kubectl completion bash)/d' "$controller_home/.bashrc" 2>/dev/null || true
+echo 'source <(kubectl completion bash)' >>"$controller_home/.bashrc" 2>/dev/null || true

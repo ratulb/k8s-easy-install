@@ -24,6 +24,17 @@ if [ -s /etc/kubernetes/admin.conf ]; then
   sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
   sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
+  # When launched under sudo, also install the kubeconfig into the invoking user's home.
+  if [ -n "${SUDO_USER:-}" ]; then
+    _user_home=$(getent passwd "$SUDO_USER" | cut -d: -f6)
+    if [ -n "$_user_home" ] && [ "$_user_home" != "$HOME" ]; then
+      sudo mkdir -p "$_user_home/.kube"
+      sudo cp -i /etc/kubernetes/admin.conf "$_user_home/.kube/config"
+      sudo chown "$SUDO_USER:$SUDO_USER" "$_user_home/.kube/config"
+      sudo chmod 600 "$_user_home/.kube/config"
+    fi
+  fi
+
   sed -i '/source <(kubectl completion bash)/d' $HOME/.bashrc
   echo 'source <(kubectl completion bash)' >>$HOME/.bashrc
   source $HOME/.bashrc
