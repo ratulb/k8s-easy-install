@@ -11,8 +11,8 @@ sed -i '/CALICO_IPV4POOL_IPIP/{n;s/value: "Always"/value: "Never"/}' /tmp/calico
 sed -i '/CALICO_IPV4POOL_VXLAN/{n;s/value: "Never"/value: "Always"/}' /tmp/calico.yaml
 # Use VXLAN backend (no BGP) — BGP (TCP 179) is problematic across NATed public IPs
 sed -i 's/calico_backend: "bird"/calico_backend: "vxlan"/' /tmp/calico.yaml
-# Remove bird-ready from readiness probe (BIRD not used in vxlan mode)
-sed -i 's#/bin/calico-node -felix-ready -bird-ready#/bin/calico-node -felix-ready#' /tmp/calico.yaml
+# Remove BIRD probes (BIRD is not used in VXLAN mode)
+sed -i '/- -bird-live/d; /- -bird-ready/d' /tmp/calico.yaml
 kubectl apply -f /tmp/calico.yaml
 # Use the Kubernetes node's InternalIP (public IP) for Calico node identity
 kubectl set env daemonset/calico-node -n kube-system IP_AUTODETECTION_METHOD=kubernetes-internal-ip 2>/dev/null || true

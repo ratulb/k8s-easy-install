@@ -5,7 +5,7 @@ loadbalancer=#loadbalancer#
 lb_port=#lb_port#
 
 sudo systemctl restart kubelet
-_advertise_address=$(curl -s --max-time 3 https://api.ipify.org 2>/dev/null)
+_advertise_address=$(ip route get 1.1.1.1 2>/dev/null | awk '{print $7}')
 if [ -z "$_advertise_address" ]; then
   _advertise_address=$(hostname -I | awk '{print $1}')
 fi
