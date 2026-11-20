@@ -54,12 +54,14 @@ EOF
 sudo DEBIAN_FRONTEND=noninteractive apt update
 sudo DEBIAN_FRONTEND=noninteractive apt install -y --allow-downgrades kubelet kubeadm kubectl
 sudo apt-mark hold kubelet kubeadm kubectl
-# Use this machine's public IP as the node IP (private IPs collide across VNets).
-# Add it to loopback so kubelet accepts it even when it is NATed (Azure).
-_public_ip=$(curl -s --max-time 3 https://api.ipify.org 2>/dev/null)
-if [ -n "$_public_ip" ]; then
-  sudo ip addr add "$_public_ip/32" dev lo 2>/dev/null || true
-  echo "KUBELET_EXTRA_ARGS=--node-ip=$_public_ip" | sudo tee /etc/default/kubelet >/dev/null
+# Use this machine's private VNet IP as the node IP so kubelet/API traffic
+# stays on the internal network (public IPs are blocked by NSG for 10250).
+_private_ip=$(ip -4 addr show eth0 2>/dev/null | awk '/inet / {print $2}' | cut -d/ -f1 | head -1)
+if [ -z "$_private_ip" ]; then
+  _private_ip=$(hostname -I 2>/dev/null | awk '{print $1}')
+fi
+if [ -n "$_private_ip" ]; then
+  echo "KUBELET_EXTRA_ARGS=--node-ip=$_private_ip" | sudo tee /etc/default/kubelet >/dev/null
 fi
 sudo systemctl daemon-reload
 sudo systemctl restart kubelet
