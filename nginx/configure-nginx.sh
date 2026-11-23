@@ -29,7 +29,10 @@ if is_address_local $loadbalancer; then
   sudo cp nginx.draft /etc/nginx/nginx.conf
   rm -f nginx.draft
 else
-  remote_copy nginx.draft $loadbalancer:/etc/nginx/nginx.conf
+  remote_copy nginx.draft $loadbalancer:/tmp/nginx.conf.draft
+  remote_cmd $loadbalancer "sudo mkdir -p /etc/nginx"
+  remote_cmd $loadbalancer "sudo cp /tmp/nginx.conf.draft /etc/nginx/nginx.conf"
+  remote_cmd $loadbalancer "rm -f /tmp/nginx.conf.draft"
 fi
 
 prnt "Configured nginx on $loadbalancer"

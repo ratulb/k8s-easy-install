@@ -9,7 +9,7 @@ fi
 # Extract full join commands from kubeadm-init.log.
 # Reassemble continuation lines (backslash at end -> next line).
 full_join_cmds=$(awk '
-  /^kubeadm join/ {
+  /^[[:space:]]*kubeadm join/ {
     cmd = $0
     while (cmd ~ /\\$/) {
       getline next_line
@@ -40,11 +40,18 @@ fi
 # Write control-plane join command (has --control-plane flag)
 if [ -n "$loadbalancer" ]; then
   master_cmd=$(echo "$full_join_cmds" | grep -- '--control-plane' | head -1)
-  if [ -n "$master_cmd" ]; then
-     {
-       echo "sleep ${sleep_time:-3}"
-       echo "sudo $master_cmd --apiserver-advertise-address \$(curl -s --max-time 3 https://api.ipify.org) --ignore-preflight-errors=all -v=6 | tee /tmp/master-join-response"
-     } > master-join-cluster.cmd
+   if [ -n "$master_cmd" ]; then
+      {
+        echo "sleep ${sleep_time:-3}"
+        echo "sudo $master_cmd --apiserver-advertise-address \$(hostname -I | awk '{print \$1}') --ignore-preflight-errors=all -v=6 | tee /tmp/master-join-response"
+        echo "if [ -s /etc/kubernetes/admin.conf ]; then"
+        echo "  mkdir -p \$HOME/.kube"
+        echo "  sudo cp -i /etc/kubernetes/admin.conf \$HOME/.kube/config"
+        echo "  sudo chown \$(id -u):\$(id -g) \$HOME/.kube/config"
+        echo "  sed -i '/source <(kubectl completion bash)/d' \$HOME/.bashrc"
+        echo "  echo 'source <(kubectl completion bash)' >>\$HOME/.bashrc"
+        echo "fi"
+      } > master-join-cluster.cmd
     chmod +x master-join-cluster.cmd
   fi
 fi

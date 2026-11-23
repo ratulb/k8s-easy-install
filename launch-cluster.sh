@@ -115,8 +115,6 @@ for _master in $masters; do
     fi
     if [ "$count" -eq 0 ]; then
       . copy-kube-config.sh 'from' $_master
-    else
-      . copy-kube-config.sh 'to' $_master
     fi
   fi
   ((count++))

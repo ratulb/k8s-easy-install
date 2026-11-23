@@ -7,9 +7,9 @@
 prnt "Starting envoy on $loadbalancer"
 
 if ! is_address_local $loadbalancer; then
-  remote_cmd $loadbalancer systemctl daemon-reload
-  remote_cmd $loadbalancer systemctl enable envoy
-  remote_cmd $loadbalancer systemctl restart envoy
+  remote_cmd $loadbalancer "sudo systemctl daemon-reload"
+  remote_cmd $loadbalancer "sudo systemctl enable envoy"
+  remote_cmd $loadbalancer "sudo systemctl restart envoy"
 else
   sudo systemctl daemon-reload
   sudo systemctl enable envoy

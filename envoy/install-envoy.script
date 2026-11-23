@@ -1,5 +1,5 @@
-sudo apt update
-sudo apt install -y apt-transport-https ca-certificates curl gnupg
+sudo DEBIAN_FRONTEND=noninteractive apt update
+sudo DEBIAN_FRONTEND=noninteractive apt install -y apt-transport-https ca-certificates curl gnupg
 
 # Add the official Envoy proxy apt repository
 # The repo supports: bookworm, bullseye, focal, jammy
@@ -26,5 +26,5 @@ curl -fsSL https://apt.envoyproxy.io/signing.key \
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/envoy-keyring.gpg] https://apt.envoyproxy.io $envoy_distro main" \
   | sudo tee /etc/apt/sources.list.d/envoy.list > /dev/null
 
-sudo apt update
-sudo apt install -y envoy
+sudo DEBIAN_FRONTEND=noninteractive apt update
+sudo DEBIAN_FRONTEND=noninteractive apt install -y envoy
