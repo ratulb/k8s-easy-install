@@ -19,8 +19,11 @@ ORIGINAL_NODES="$masters $workers"
 
 BACKUP=$(mktemp)
 cp setup.conf "$BACKUP"
+KEEP_CONFIG=0
 restore_setup() {
-  cp "$BACKUP" setup.conf
+  if [ "$KEEP_CONFIG" -eq 0 ]; then
+    cp "$BACKUP" setup.conf
+  fi
   rm -f "$BACKUP"
 }
 trap restore_setup EXIT
@@ -137,6 +140,7 @@ esac
 
 echo ""
 if [ "$failed" -eq 0 ]; then
+  KEEP_CONFIG=1
   echo "RESULT: PASS ($MODE)"
 else
   echo "RESULT: FAIL ($MODE)" >&2

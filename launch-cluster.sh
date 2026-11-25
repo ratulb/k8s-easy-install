@@ -77,9 +77,9 @@ if [ ! -z "$loadbalancer" ]; then
       . nginx/start-nginx.sh || _ret
       ;;
     envoy)
-      . envoy/install-envoy.sh
-      . envoy/configure-envoy.sh
-      . envoy/start-envoy.sh
+      . envoy/install-envoy.sh || _ret
+      . envoy/configure-envoy.sh || _ret
+      . envoy/start-envoy.sh || _ret
       ;;
     *)
       err "I am not programmed to receive you!"

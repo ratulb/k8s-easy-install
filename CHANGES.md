@@ -247,5 +247,13 @@ These are documented in `AGENTS.md` under "Pre-requisites for multi-node testing
 ### Regression test: `tests/e2e-nginx-8080.sh`
 - New e2e case for nginx LB on port 8080 with two modes: `single` (localhost as LB+master) and `all-masters` (all configured nodes promoted to control-plane, LB placed on a remote master to exercise the remote install path).
 - Verifies nginx is active, `listen 8080;` is present, port 8080 is listening, `https://<lb>:8080/healthz` succeeds, and all nodes reach Ready.
-- Backs up and restores `setup.conf` on exit.
+- Backs up `setup.conf`; restores it on failure and leaves the passing test config in place so management scripts match the running LB.
 - Clears bash's command hash table before querying nodes: `kube-remove.sh` deletes `/usr/local/bin/kubectl`, which otherwise leaves the parent test shell with a stale `kubectl` path between scenarios.
+
+## Regression test: `tests/e2e-envoy-8080.sh`
+
+- Added the same single-node and all-masters :8080 coverage for envoy as the nginx test.
+- Verifies envoy is active, `port_value: 8080` is configured, port 8080 is listening, `https://<lb>:8080/healthz` succeeds, and all nodes reach Ready.
+- `envoy/install-envoy.sh` now fails fast when the remote/local installer fails; `envoy/install-envoy.script` verifies the `envoy` binary after apt install.
+- `envoy/start-envoy.sh` now verifies the service is active; `launch-cluster.sh` aborts if any envoy LB step fails.
+- On success the envoy test leaves its `setup.conf` in place so `lb-status.sh` and `cleanup-all.sh` target envoy, not the previous LB.

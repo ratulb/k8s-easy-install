@@ -28,3 +28,4 @@ echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/envoy-k
 
 sudo DEBIAN_FRONTEND=noninteractive apt update
 sudo DEBIAN_FRONTEND=noninteractive apt install -y envoy
+command -v envoy >/dev/null

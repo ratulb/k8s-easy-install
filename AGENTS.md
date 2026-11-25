@@ -46,7 +46,8 @@ Run from project root. All require passwordless sudo and (for multi-node) SSH ke
 |---------|---------|
 | `bash tests/e2e-single-node.sh [lb_type]` | Fast regression: writes single-node `setup.conf`, sources each step in order. LB types: envoy (default), nginx, haproxy. **Leaves cluster running.** |
 | `bash tests/e2e-multi-node.sh [iterations]` | Validates cross-node pod networking (HTTP both ways via Calico VXLAN). Reads existing `setup.conf`. Builds `echo y \| launch-cluster.sh` → test → `cleanup-all.sh`. Default 1 iteration. |
-| `bash tests/e2e-nginx-8080.sh [single\|all-masters\|all]` | Regression for nginx LB on port 8080: `single` uses localhost as LB+master; `all-masters` promotes every node from `setup.conf` to control-plane and puts the LB on a remote master (exercises remote install). Verifies `listen 8080`, active service, `https://<lb>:8080/healthz`, and all nodes Ready. Restores original `setup.conf` on exit. |
+| `bash tests/e2e-nginx-8080.sh [single\|all-masters\|all]` | Regression for nginx LB on port 8080: `single` uses localhost as LB+master; `all-masters` promotes every node from `setup.conf` to control-plane and puts the LB on a remote master (exercises remote install). Verifies `listen 8080`, active service, `https://<lb>:8080/healthz`, and all nodes Ready. Restores original `setup.conf` on failure; leaves the passing test config in place. |
+| `bash tests/e2e-envoy-8080.sh [single\|all-masters\|all]` | Same regression for envoy LB on port 8080: verifies `port_value: 8080`, active service, `https://<lb>:8080/healthz`, and all nodes Ready across single-node and all-masters layouts. Restores original `setup.conf` on failure; leaves the passing test config in place. |
 | `bash tests/test.sh [count]` | Stress test (default 20 iterations): random LB type each iteration, dumps `kubectl get nodes` to `tests/test-result.txt`. **Does NOT run cleanup between iterations** (known limitation). |
 
 ## Gotchas
