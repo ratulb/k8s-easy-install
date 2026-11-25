@@ -265,3 +265,9 @@ These are documented in `AGENTS.md` under "Pre-requisites for multi-node testing
 - README/ABOUT updated to v1.37.2 / v1.37.x.
 - Installer still rebuilds nodes via `kube-remove.sh`, so this is a clean v1.37.2 provisioning path, not an in-place `kubeadm upgrade`.
 - Verified with `tests/e2e-envoy-8080.sh all`: single-node and 3 control-plane clusters at v1.37.2, `healthz` via envoy :8080 OK. kubeadm logs an etcd fallback to `3.7.0-0`; all system pods became healthy.
+
+## Fail fast on CNI installation
+
+- `install-cni-pluggin.sh` now uses `curl -fsSL` and returns non-zero if the manifest download, patching, or `kubectl apply` fails instead of always exiting 0 after `rm -f`.
+- `launch-cluster.sh` now aborts if the local or remote Calico install fails, preventing clusters that come up with `NetworkPluginNotReady: cni plugin not initialized`.
+- Recovered an affected 2-master/1-worker v1.37.2 cluster by re-running the CNI install; all nodes and pods returned to Ready/Running.

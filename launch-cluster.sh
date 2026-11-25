@@ -96,7 +96,7 @@ for _master in $masters; do
     if [ "$count" -eq 0 ]; then
       . kubeadm-init.sh.tmp
       . prepare-cluster-join.sh
-      . install-cni-pluggin.sh
+      . install-cni-pluggin.sh || _ret
     else
       . master-join-cluster.cmd
     fi
@@ -109,7 +109,7 @@ for _master in $masters; do
       . copy-init-log.sh $_master
       . prepare-cluster-join.sh
       prnt "Installing Calico CNI"
-      remote_script $_master install-cni-pluggin.sh
+      remote_script $_master install-cni-pluggin.sh || _ret
     else
       remote_script $_master master-join-cluster.cmd
     fi
