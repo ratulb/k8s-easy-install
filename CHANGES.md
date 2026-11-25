@@ -257,3 +257,11 @@ These are documented in `AGENTS.md` under "Pre-requisites for multi-node testing
 - `envoy/install-envoy.sh` now fails fast when the remote/local installer fails; `envoy/install-envoy.script` verifies the `envoy` binary after apt install.
 - `envoy/start-envoy.sh` now verifies the service is active; `launch-cluster.sh` aborts if any envoy LB step fails.
 - On success the envoy test leaves its `setup.conf` in place so `lb-status.sh` and `cleanup-all.sh` target envoy, not the previous LB.
+
+## Upgrade to Kubernetes v1.37 (upgrade branch)
+
+- `install-kubeadm.sh`: added `K8S_MINOR=v1.37` and switched the apt repo/key from `v1.36` to `v1.37`; apt installs the latest patch release (currently `v1.37.2`).
+- Removes the version-skew fallback seen as `remote version is much newer: v1.37.2; falling back to: stable-1.36`.
+- README/ABOUT updated to v1.37.2 / v1.37.x.
+- Installer still rebuilds nodes via `kube-remove.sh`, so this is a clean v1.37.2 provisioning path, not an in-place `kubeadm upgrade`.
+- Verified with `tests/e2e-envoy-8080.sh all`: single-node and 3 control-plane clusters at v1.37.2, `healthz` via envoy :8080 OK. kubeadm logs an etcd fallback to `3.7.0-0`; all system pods became healthy.

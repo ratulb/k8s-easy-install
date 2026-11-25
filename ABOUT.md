@@ -13,7 +13,7 @@
 | Cluster modes | Single-node and multi-node (control-plane + workers) |
 | Load balancers | HAProxy, NGINX, or Envoy (TCP proxy to kube-apiserver :6443) |
 | CNI | Calico v3.32.1 (patched to VXLAN mode) |
-| Kubernetes | v1.36.x repo (`pkgs.k8s.io ... v1.36`) — kubelet/kubeadm/kubectl installed and held |
+| Kubernetes | v1.37.x repo (`pkgs.k8s.io ... v1.37`) — kubelet/kubeadm/kubectl installed and held |
 | Container runtime | containerd (configured with `SystemdCgroup = true`; Docker removed if present) |
 | Target OS (per README) | Debian 11/12/13, Ubuntu 20.04/22.04/24.04 |
 | Config file | `setup.conf` (key=value), editable directly or via menu |
@@ -75,7 +75,7 @@ Main options include: Cluster setup, Kubelet status, System pod status, Load bal
 | `cluster.sh` | Interactive menu/UX, config capture, validation, launch/cleanup entrypoints |
 | `launch-cluster.sh` | Main orchestrator for LB install, node provisioning, init/join, CNI, controller setup, smoke test |
 | `utils.sh` | Shared helpers (logging, SSH/remote ops, IP/host/port validation, local-address detection, config read/write/reset) |
-| `install-kubeadm.sh` | Prepares node: kernel modules/sysctl, removes Docker, installs/configures containerd, adds K8s apt repo/key/pin (v1.36), installs & holds kubeadm/kubelet/kubectl, sets kubelet node IP |
+| `install-kubeadm.sh` | Prepares node: kernel modules/sysctl, removes Docker, installs/configures containerd, adds K8s apt repo/key/pin (v1.37), installs & holds kubeadm/kubelet/kubectl, sets kubelet node IP |
 | `kubeadm-init.sh` | Template for first control-plane init; renders endpoint/pod CIDR/advertise address, runs `kubeadm init`, writes kubeconfig and bash completion |
 | `prepare-cluster-join.sh` | Parses `kubeadm-init.log` into `worker-join-cluster.cmd` and `master-join-cluster.cmd` (handles multi-line join commands) |
 | `install-cni-pluggin.sh` | Downloads Calico v3.32.1 manifest, patches IPIP→Never and VXLAN→Always, sets vxlan backend/readiness/env, applies manifest (filename intentionally spelled `pluggin`) |

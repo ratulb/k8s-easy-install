@@ -15,7 +15,7 @@
 | Nodes | Single-node or multi-node (control-plane + workers) |
 | LB options | HAProxy, NGINX, or Envoy |
 | CNI | Calico (VXLAN — works in all clouds) |
-| K8s version | v1.36.2 (from pkgs.k8s.io) |
+| K8s version | v1.37.2 (from pkgs.k8s.io) |
 | Runtime | containerd (Docker removed if present) |
 | Controller | Any Linux machine with SSH access to nodes |
 | Tested on | Debian 11/12/13, Ubuntu 20.04/22.04/24.04 |

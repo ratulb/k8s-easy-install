@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 export DEBIAN_FRONTEND=noninteractive
+K8S_MINOR=v1.37
 sudo DEBIAN_FRONTEND=noninteractive apt update
 
 # Load kernel modules required by Kubernetes
@@ -39,9 +40,9 @@ sudo systemctl enable containerd
 # Add the new Kubernetes apt repository (pkgs.k8s.io)
 sudo DEBIAN_FRONTEND=noninteractive apt install -y apt-transport-https ca-certificates curl gnupg
 sudo mkdir -p /etc/apt/keyrings
-curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.36/deb/Release.key \
+curl -fsSL "https://pkgs.k8s.io/core:/stable:/$K8S_MINOR/deb/Release.key" \
   | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.36/deb/ /' \
+echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/$K8S_MINOR/deb/ /" \
   | sudo tee /etc/apt/sources.list.d/kubernetes.list
 
 # Pin pkgs.k8s.io so kubelet/kubeadm/kubectl come from the right repo
@@ -66,4 +67,4 @@ fi
 sudo systemctl daemon-reload
 sudo systemctl restart kubelet
 
-echo "Kubeadm install has completed (Kubernetes v1.36)"
+echo "Kubeadm install has completed (Kubernetes $K8S_MINOR)"
