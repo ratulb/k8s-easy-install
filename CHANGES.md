@@ -231,3 +231,21 @@ Before a remote node can be used in the cluster, the controller machine must hav
 4. **Consistent username** — SSH user should be the same on controller and remote nodes (simplifies script assumptions), though not strictly required if SSH config is set up.
 
 These are documented in `AGENTS.md` under "Pre-requisites for multi-node testing".
+
+## Fix: nginx remote LB installation (Nov 2026)
+
+### Root cause of `10.1.0.4:8080` connection refused
+- `nginx/install-nginx.sh` piped the install script into `remote_cmd`, but `remote_cmd` runs SSH with `-n` (stdin from `/dev/null`), so the remote `bash -s` received no script and silently installed nothing.
+- The nginx apt repo URL was also wrong: Ubuntu codenames were mapped to `jammy` but used `http://nginx.org/packages/debian`, where that suite does not exist (`404`). nginx.org hosts Ubuntu suites under `/packages/ubuntu` (e.g. `noble`, `jammy`).
+- `configure-nginx.sh` still copied the generated config and `start-nginx.sh` tried to restart a nonexistent unit, so the installer continued without a listener on `:8080` until kubeadm discovery failed.
+
+### Changes
+- `nginx/install-nginx.sh`: write the remote install script to a temp file and run it via `remote_script` (which does not use SSH `-n`).
+- Distro detection now uses `/etc/os-release` and selects the correct nginx.org repo base (`ubuntu` vs `debian`) and supported codename.
+- Added post-install binary checks and fail-fast service checks in `nginx/start-nginx.sh`; `launch-cluster.sh` now aborts if any nginx LB step fails.
+
+### Regression test: `tests/e2e-nginx-8080.sh`
+- New e2e case for nginx LB on port 8080 with two modes: `single` (localhost as LB+master) and `all-masters` (all configured nodes promoted to control-plane, LB placed on a remote master to exercise the remote install path).
+- Verifies nginx is active, `listen 8080;` is present, port 8080 is listening, `https://<lb>:8080/healthz` succeeds, and all nodes reach Ready.
+- Backs up and restores `setup.conf` on exit.
+- Clears bash's command hash table before querying nodes: `kube-remove.sh` deletes `/usr/local/bin/kubectl`, which otherwise leaves the parent test shell with a stale `kubectl` path between scenarios.

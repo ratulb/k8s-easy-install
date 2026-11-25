@@ -72,9 +72,9 @@ if [ ! -z "$loadbalancer" ]; then
       . haproxy/start-haproxy.sh
       ;;
     nginx)
-      . nginx/install-nginx.sh
-      . nginx/configure-nginx.sh
-      . nginx/start-nginx.sh
+      . nginx/install-nginx.sh || _ret
+      . nginx/configure-nginx.sh || _ret
+      . nginx/start-nginx.sh || _ret
       ;;
     envoy)
       . envoy/install-envoy.sh
